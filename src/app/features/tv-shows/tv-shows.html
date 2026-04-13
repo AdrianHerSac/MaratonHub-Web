@@ -1,0 +1,90 @@
+<div class="peliculas-container">
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="gradient-text">Series de TV</span>
+      </h1>
+      <p class="hero-subtitle">Descubre tu próxima maratón o explora por categoría</p>
+    </div>
+  </section>
+
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <span class="search-icon">🔍</span>
+      <input
+        id="tv-search"
+        class="search-input"
+        type="text"
+        placeholder="Buscar serie..."
+        [value]="searchQuery"
+        (input)="onSearchInput($event)"
+        autocomplete="off"
+      />
+      @if (searchQuery) {
+        <button class="search-clear" (click)="clearSearch()" aria-label="Limpiar búsqueda">✕</button>
+      }
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Cargando series...</p>
+    </div>
+  } @else {
+
+    @if (searchQuery.length > 1) {
+      <section class="content-section">
+        <h2 class="section-title">🔍 Resultados para "{{ searchQuery }}"</h2>
+        <div class="media-grid">
+          @for (show of searchResultShows; track show.id) {
+            <a [routerLink]="['/tv', show.id]" class="media-card">
+              <div class="card-image">
+                <img [src]="getImageUrl(show.posterPath)" [alt]="show.name" loading="lazy" />
+                <div class="card-overlay">
+                  <div class="rating-badge" [style.borderColor]="getRatingColor(getShowRating(show.id))">
+                    <span class="rating-pct" [style.color]="getRatingColor(getShowRating(show.id))">
+                      {{ getShowRating(show.id) }}%
+                    </span>
+                    <span class="rating-label">MaratonHub</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card-content">
+                <h3>{{ show.name }}</h3>
+                <p class="release-date">{{ show.firstAirDate ? (show.firstAirDate | date:'yyyy') : 'TBA' }}</p>
+              </div>
+            </a>
+          }
+        </div>
+      </section>
+    } @else {
+      <section class="content-section">
+        <h2 class="section-title">⭐ Series Populares</h2>
+        <div class="media-grid">
+          @for (show of popularTvShows; track show.id) {
+            <a [routerLink]="['/tv', show.id]" class="media-card">
+              <div class="card-image">
+                <img [src]="getImageUrl(show.posterPath)" [alt]="show.name" loading="lazy" />
+                <div class="card-overlay">
+                  <div class="rating-badge" [style.borderColor]="getRatingColor(getShowRating(show.id))">
+                    <span class="rating-pct" [style.color]="getRatingColor(getShowRating(show.id))">
+                      {{ getShowRating(show.id) }}%
+                    </span>
+                    <span class="rating-label">usuarios</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card-content">
+                <h3>{{ show.name }}</h3>
+                <p class="release-date">{{ show.firstAirDate ? (show.firstAirDate | date:'yyyy') : 'TBA' }}</p>
+              </div>
+            </a>
+          }
+        </div>
+      </section>
+    }
+  }
+
+</div>

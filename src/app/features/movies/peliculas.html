@@ -1,0 +1,181 @@
+<div class="peliculas-container">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="gradient-text">Películas</span>
+      </h1>
+      <p class="hero-subtitle">Busca tus películas favoritas o explora por género</p>
+    </div>
+  </section>
+
+  <!-- Barra de búsqueda y géneros -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <span class="search-icon">🔍</span>
+      <input
+        id="movie-search"
+        class="search-input"
+        type="text"
+        placeholder="Buscar película..."
+        [value]="searchQuery"
+        (input)="onSearchInput($event)"
+        autocomplete="off"
+      />
+      @if (searchQuery) {
+      <button class="search-clear" (click)="clearSearch()" aria-label="Limpiar búsqueda">✕</button>
+      }
+    </div>
+    <div class="genre-select-wrapper">
+      <select
+        id="genre-select"
+        class="genre-select"
+        [value]="selectedGenreKey"
+        (change)="onGenreChange($event)"
+      >
+        @for (genre of genres; track genre.name) {
+        <option [value]="genre.name">{{ genre.emoji }} {{ genre.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- Vista "Todos" → Tendencia + Popular -->
+  @if (activeView === 'all') {
+  @if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Cargando contenido...</p>
+  </div>
+  } @else {
+  <section class="content-section">
+    <h2 class="section-title">🔥 Películas en Tendencia</h2>
+    <div class="media-grid">
+      @for (movie of trendingMovies; track movie.id) {
+      <a [routerLink]="['/movie', movie.id]" class="media-card">
+        <div class="card-image">
+          <img [src]="getImageUrl(movie.posterPath)" [alt]="movie.title" loading="lazy" />
+          <div class="card-overlay">
+            <div class="rating-badge" [style.borderColor]="getRatingColor(getRating(movie.id))">
+              <span class="rating-pct" [style.color]="getRatingColor(getRating(movie.id))">
+                {{ getRating(movie.id) }}%
+              </span>
+              <span class="rating-label">usuarios</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3>{{ movie.title }}</h3>
+          <p class="release-date">{{ movie.releaseDate ? (movie.releaseDate | date:'yyyy') : 'TBA' }}</p>
+        </div>
+      </a>
+      }
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2 class="section-title">⭐ Más Populares</h2>
+    <div class="media-grid">
+      @for (movie of popularMovies; track movie.id) {
+      <a [routerLink]="['/movie', movie.id]" class="media-card">
+        <div class="card-image">
+          <img [src]="getImageUrl(movie.posterPath)" [alt]="movie.title" loading="lazy" />
+          <div class="card-overlay">
+            <div class="rating-badge" [style.borderColor]="getRatingColor(getRating(movie.id))">
+              <span class="rating-pct" [style.color]="getRatingColor(getRating(movie.id))">
+                {{ getRating(movie.id) }}%
+              </span>
+              <span class="rating-label">usuarios</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3>{{ movie.title }}</h3>
+          <p class="release-date">{{ movie.releaseDate ? (movie.releaseDate | date:'yyyy') : 'TBA' }}</p>
+        </div>
+      </a>
+      }
+    </div>
+  </section>
+  }
+  }
+
+  <!-- Vista por género -->
+  @if (activeView === 'genre') {
+  @if (genreLoading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Cargando películas...</p>
+  </div>
+  } @else {
+  <section class="content-section genre-section">
+    <div class="media-grid">
+      @for (movie of genreMovies; track movie.id) {
+      <a [routerLink]="['/movie', movie.id]" class="media-card">
+        <div class="card-image">
+          <img [src]="getImageUrl(movie.posterPath)" [alt]="movie.title" loading="lazy" />
+          <div class="card-overlay">
+            <div class="rating-badge" [style.borderColor]="getRatingColor(getRating(movie.id))">
+              <span class="rating-pct" [style.color]="getRatingColor(getRating(movie.id))">
+                {{ getRating(movie.id) }}%
+              </span>
+              <span class="rating-label">usuarios</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3>{{ movie.title }}</h3>
+          <p class="release-date">{{ movie.releaseDate ? (movie.releaseDate | date:'yyyy') : 'TBA' }}</p>
+        </div>
+      </a>
+      }
+      @if (genreMovies.length === 0) {
+      <p class="empty-msg">No se encontraron películas en esta categoría.</p>
+      }
+    </div>
+  </section>
+  }
+  }
+
+  <!-- Vista búsqueda por texto -->
+  @if (activeView === 'search') {
+  @if (searchLoading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Buscando películas...</p>
+  </div>
+  } @else {
+  <section class="content-section genre-section">
+    @if (searchQuery.length > 1) {
+    <h2 class="section-title">🔍 Resultados para "{{ searchQuery }}"</h2>
+    }
+    <div class="media-grid">
+      @for (movie of searchMovies; track movie.id) {
+      <a [routerLink]="['/movie', movie.id]" class="media-card">
+        <div class="card-image">
+          <img [src]="getImageUrl(movie.posterPath)" [alt]="movie.title" loading="lazy" />
+          <div class="card-overlay">
+            <div class="rating-badge" [style.borderColor]="getRatingColor(getRating(movie.id))">
+              <span class="rating-pct" [style.color]="getRatingColor(getRating(movie.id))">
+                {{ getRating(movie.id) }}%
+              </span>
+              <span class="rating-label">usuarios</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3>{{ movie.title }}</h3>
+          <p class="release-date">{{ movie.releaseDate ? (movie.releaseDate | date:'yyyy') : 'TBA' }}</p>
+        </div>
+      </a>
+      }
+      @if (searchMovies.length === 0 && !searchLoading) {
+      <p class="empty-msg">No se encontraron películas para tu búsqueda.</p>
+      }
+    </div>
+  </section>
+  }
+  }
+
+</div>

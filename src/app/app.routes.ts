@@ -1,0 +1,36 @@
+import { Routes } from '@angular/router';
+import { HomeComponent } from './features/home/home';
+import { PeliculasComponent } from './features/movies/peliculas';
+import { MediaDetailComponent } from './features/media-detail/media-detail';
+import {TvShowsComponent} from './features/tv-shows/tv-shows';
+
+export const routes: Routes = [
+    {
+      path: 'inicio',
+      component: HomeComponent
+    },
+    {
+      path: 'movies',
+      component: PeliculasComponent
+    },
+    {
+        path: 'movie/:id',
+        component: MediaDetailComponent
+    },
+    {
+      path: 'tv',
+      component: TvShowsComponent
+    },
+    {
+        path: 'tv/:id',
+        component: MediaDetailComponent
+    },
+    {
+        path: 'person/:id',
+        component: MediaDetailComponent
+    },
+    {
+        path: '**',
+        redirectTo: ''
+    }
+];

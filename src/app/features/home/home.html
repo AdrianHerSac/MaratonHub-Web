@@ -1,0 +1,199 @@
+<div class="home-container">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="gradient-text">MaratonHub</span>
+      </h1>
+      <p class="hero-subtitle">Descubre, opina y comparte tus películas, series y celebridades favoritas</p>
+      <!-- Buscador global -->
+      <div class="home-search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input
+          id="home-search"
+          class="home-search-input"
+          type="text"
+          placeholder="Buscar películas, series, personas..."
+          [value]="searchQuery"
+          (input)="onSearchInput($event)"
+          autocomplete="off"
+        />
+        @if (searchQuery) {
+        <button class="search-clear" (click)="clearSearch()" aria-label="Limpiar">✕</button>
+        }
+      </div>
+    </div>
+  </section>
+
+  @if (loading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Cargando contenido...</p>
+  </div>
+  } @else if (searchQuery.length > 1) {
+
+  <!-- Resultados de búsqueda global -->
+  @if (searchLoading) {
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Buscando...</p>
+  </div>
+  } @else {
+
+  @if (searchResultMovies.length > 0) {
+  <section class="content-section">
+    <h2 class="section-title">🎬 Películas</h2>
+    <div class="media-grid">
+      @for (movie of searchResultMovies; track movie.id) {
+      <a [routerLink]="['/movie', movie.id]" class="media-card">
+        <div class="card-image">
+          <img [src]="getImageUrl(movie.posterPath)" [alt]="movie.title" loading="lazy" />
+          <div class="card-overlay">
+            <div class="rating-badge" [style.borderColor]="getRatingColor(getMovieRating(movie.id))">
+              <span class="rating-pct" [style.color]="getRatingColor(getMovieRating(movie.id))">{{ getMovieRating(movie.id) }}%</span>
+              <span class="rating-label">usuarios</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3>{{ movie.title }}</h3>
+          <p class="release-date">{{ movie.releaseDate ? (movie.releaseDate | date:'yyyy') : 'TBA' }}</p>
+        </div>
+      </a>
+      }
+    </div>
+  </section>
+  }
+
+  @if (searchResultShows.length > 0) {
+  <section class="content-section">
+    <h2 class="section-title">📺 Series</h2>
+    <div class="media-grid">
+      @for (show of searchResultShows; track show.id) {
+      <a [routerLink]="['/tv', show.id]" class="media-card">
+        <div class="card-image">
+          <img [src]="getImageUrl(show.posterPath)" [alt]="show.name" loading="lazy" />
+          <div class="card-overlay">
+            <div class="rating-badge" [style.borderColor]="getRatingColor(getShowRating(show.id))">
+              <span class="rating-pct" [style.color]="getRatingColor(getShowRating(show.id))">{{ getShowRating(show.id) }}%</span>
+              <span class="rating-label">usuarios</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3>{{ show.name }}</h3>
+          <p class="release-date">{{ show.firstAirDate ? (show.firstAirDate | date:'yyyy') : 'TBA' }}</p>
+        </div>
+      </a>
+      }
+    </div>
+  </section>
+  }
+
+  @if (searchResultPersons.length > 0) {
+  <section class="content-section">
+    <h2 class="section-title">⭐ Personas</h2>
+    <div class="media-grid">
+      @for (person of searchResultPersons; track person.id) {
+      <a [routerLink]="['/person', person.id]" class="media-card person-card">
+        <div class="card-image">
+          <img [src]="getImageUrl(person.profilePath)" [alt]="person.name" loading="lazy" />
+          <div class="card-overlay">
+            <div class="popularity">{{ person.popularity.toFixed(0) }}</div>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3>{{ person.name }}</h3>
+          <p class="known-for">{{ person.knownForDepartment || 'Actor' }}</p>
+        </div>
+      </a>
+      }
+    </div>
+  </section>
+  }
+
+  @if (!searchLoading && searchResultMovies.length === 0 && searchResultShows.length === 0 && searchResultPersons.length === 0) {
+  <p class="empty-msg">No se encontraron resultados para "{{ searchQuery }}".</p>
+  }
+
+  }
+
+  } @else {
+  <!-- Trending Movies -->
+  <section class="content-section">
+    <h2 class="section-title">🔥 Películas en Tendencia</h2>
+    <div class="media-grid">
+      @for (movie of trendingMovies.slice(0, 100); track movie.id) {
+      <a [routerLink]="['/movie', movie.id]" class="media-card">
+        <div class="card-image">
+          <img [src]="getImageUrl(movie.posterPath)" [alt]="movie.title" />
+          <div class="card-overlay">
+            <div class="rating-badge" [style.borderColor]="getRatingColor(getMovieRating(movie.id))">
+              <span class="rating-pct" [style.color]="getRatingColor(getMovieRating(movie.id))">{{
+                getMovieRating(movie.id) }}%</span>
+              <span class="rating-label">usuarios</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3>{{ movie.title }}</h3>
+          <p class="release-date">
+            {{ movie.releaseDate ? (movie.releaseDate | date: 'yyyy') : 'TBA' }}
+          </p>
+        </div>
+      </a>
+      }
+    </div>
+  </section>
+
+  <!-- Popular TV Shows -->
+  <section class="content-section">
+    <h2 class="section-title">📺 Series Populares</h2>
+    <div class="media-grid">
+      @for (show of popularTvShows.slice(0, 100); track show.id) {
+      <a [routerLink]="['/tv', show.id]" class="media-card">
+        <div class="card-image">
+          <img [src]="getImageUrl(show.posterPath)" [alt]="show.name" />
+          <div class="card-overlay">
+            <div class="rating-badge" [style.borderColor]="getRatingColor(getShowRating(show.id))">
+              <span class="rating-pct" [style.color]="getRatingColor(getShowRating(show.id))">{{ getShowRating(show.id)
+                }}%</span>
+              <span class="rating-label">usuarios</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3>{{ show.name }}</h3>
+          <p class="release-date">
+            {{ show.firstAirDate ? (show.firstAirDate | date: 'yyyy') : 'TBA' }}
+          </p>
+        </div>
+      </a>
+      }
+    </div>
+  </section>
+
+  <!-- Popular Persons -->
+  <section class="content-section">
+    <h2 class="section-title">⭐ Celebridades Populares</h2>
+    <div class="media-grid">
+      @for (person of popularPersons.slice(0, 100); track person.id) {
+      <a [routerLink]="['/person', person.id]" class="media-card person-card">
+        <div class="card-image">
+          <img [src]="getImageUrl(person.profilePath)" [alt]="person.name" />
+          <div class="card-overlay">
+            <div class="popularity">
+              {{ person.popularity.toFixed(0) }}
+            </div>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3>{{ person.name }}</h3>
+          <p class="known-for">{{ person.knownForDepartment || 'Actor' }}</p>
+        </div>
+      </a>
+      }
+    </div>
+  </section>
+  }
+</div>

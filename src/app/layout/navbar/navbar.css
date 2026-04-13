@@ -1,0 +1,127 @@
+nav {
+  width: 100%;
+  height: 90px;
+  position: sticky;
+  left: 0;
+  right: 0;
+  padding: 0 2rem;
+  align-items: center;
+  top: 0;
+  z-index: 1000;
+}
+
+.glass-nav {
+  background: linear-gradient(to bottom,
+      rgba(36, 2, 65, 0.95),
+      rgba(0, 0, 0, 0));
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.logo-text {
+  background: linear-gradient(135deg, #00ffed 0%, #ff48b9 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+  transition: all 0.3s ease;
+}
+
+.logo-text:hover {
+  transform: scale(1.05);
+  filter: brightness(1.2);
+}
+
+.logo-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nav-link {
+  position: relative;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.8rem 1rem;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+.nav-link:hover {
+  color: white;
+  background: rgba(147, 51, 234, 0.15);
+  transform: translateY(-1px);
+}
+
+.nav-link-active {
+  color: white !important;
+  font-weight: 600;
+  background: rgba(147, 51, 234, 0.2);
+}
+
+.nav-link-active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 3px;
+  background: linear-gradient(90deg, #9333ea, #db2777, #f59e0b);
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(147, 51, 234, 0.5);
+}
+
+/* Search Input */
+.search-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(147, 51, 234, 0.2);
+  width: 30rem;
+  color: white;
+  border-radius: 12px;
+  padding: 0.5rem 1rem 0.5rem 2.5rem;
+  transition: all 0.3s ease;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.search-input:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(147, 51, 234, 0.5);
+  outline: none;
+  box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+}
+
+.search-icon {
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  top: 50% !important;
+  transform: translateY(-50%);
+}
+
+.search-input:focus~.search-icon {
+  transform: translateY(-50%) scale(1.1);
+  color: #f59e0b;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .logo-text {
+    font-size: 1.25rem;
+  }
+
+  .nav-link {
+    padding: 0.75rem 1rem;
+  }
+}

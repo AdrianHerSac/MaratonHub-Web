@@ -1,0 +1,93 @@
+<div class="detail-container">
+    @if (loading) {
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>Cargando...</p>
+    </div>
+    } @else if (media) {
+    <!-- Hero Section with Backdrop -->
+    <div class="hero" [style.backgroundImage]="'url(' + getBackdropUrl() + ')'">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="media-info">
+                <img [src]="getPosterUrl()" [alt]="getTitle()" class="poster" />
+                <div class="info-text">
+                    <h1>{{ getTitle() }}</h1>
+
+                    @if (isMovie(media)) {
+                    <div class="meta">
+                        <span class="rating">
+                            @for (star of getUserRatingStars(); track star) {
+                                <span [class]="star <= getAverageUserRating() ? 'star filled' : 'star'">★</span>
+                            }
+                            @if (getUserRatingCount() > 0) {
+                                <span class="rating-value">{{ getAverageUserRating().toFixed(1) }}/5</span>
+                            } @else {
+                                <span class="rating-value">Sin valoraciones</span>
+                            }
+                        </span>
+                        <span>{{ media.releaseDate | date: 'yyyy' }}</span>
+                        <span>{{ getUserRatingCount() }} {{ getUserRatingCount() === 1 ? 'valoración' : 'valoraciones' }}</span>
+                    </div>
+                    <div class="genres">
+                        @for (genre of media.genres; track genre.id) {
+                        <span class="genre-tag">{{ genre.name }}</span>
+                        }
+                    </div>
+                    <p class="overview">{{ media.overview }}</p>
+                    }
+
+                    @if (isTvShow(media)) {
+                    <div class="meta">
+                        <span class="rating">
+                            @for (star of getUserRatingStars(); track star) {
+                                <span [class]="star <= getAverageUserRating() ? 'star filled' : 'star'">★</span>
+                            }
+                            @if (getUserRatingCount() > 0) {
+                                <span class="rating-value">{{ getAverageUserRating().toFixed(1) }}/5</span>
+                            } @else {
+                                <span class="rating-value">Sin valoraciones</span>
+                            }
+                        </span>
+                        <span>{{ media.firstAirDate | date: 'yyyy' }}</span>
+                        <span>{{ getUserRatingCount() }} {{ getUserRatingCount() === 1 ? 'valoración' : 'valoraciones' }}</span>
+                    </div>
+                    <div class="genres">
+                        @for (genre of media.genres; track genre.id) {
+                        <span class="genre-tag">{{ genre.name }}</span>
+                        }
+                    </div>
+                    <p class="overview">{{ media.overview }}</p>
+                    }
+
+                    @if (isPerson(media)) {
+                    <div class="meta">
+                        <span>{{ media.knownForDepartment || 'Actor' }}</span>
+                        @if (media.birthday) {
+                        <span>{{ media.birthday | date: 'd MMMM yyyy' }}</span>
+                        }
+                        @if (media.placeOfBirth) {
+                        <span>{{ media.placeOfBirth }}</span>
+                        }
+                    </div>
+                    @if (media.biography) {
+                    <p class="overview">{{ media.biography }}</p>
+                    }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="reviews-section">
+        <div class="container">
+            <app-review-form [mediaId]="mediaId"
+                [mediaType]="mediaType === 'movie' ? 'Movie' : mediaType === 'tv' ? 'TvShow' : 'Person'"
+                (reviewSubmitted)="onReviewSubmitted($event)"></app-review-form>
+
+            <app-review-list [reviews]="reviews"></app-review-list>
+        </div>
+    </div>
+    }
+</div>
