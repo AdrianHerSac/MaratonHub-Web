@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { forkJoin, of, Subject, Subscription } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, switchMap, timeout } from 'rxjs/operators';
 import { TmdbApiService } from '../../core/services/tmdb-api.service';
 import { ReviewService } from '../../core/services/review.service';
 import { Movie, TvShow, Person } from '../../core/models/media.model';
@@ -19,6 +19,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   popularTvShows: TvShow[] = [];
   popularPersons: Person[] = [];
   loading = true;
+  loadError = false;
 
   // Búsqueda global
   searchQuery = '';
@@ -77,25 +78,28 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   loadData() {
     this.loading = true;
+    this.loadError = false;
 
     forkJoin({
-      movies: this.tmdbService.getTrendingMovies(),
-      shows: this.tmdbService.getPopularTvShows(),
-      persons: this.tmdbService.getPopularPersons()
+      movies: this.tmdbService.getTrendingMovies().pipe(timeout(20000), catchError(() => of([]))),
+      shows: this.tmdbService.getPopularTvShows().pipe(timeout(20000), catchError(() => of([]))),
+      persons: this.tmdbService.getPopularPersons().pipe(timeout(20000), catchError(() => of([])))
     }).subscribe({
       next: ({ movies, shows, persons }) => {
-        this.trendingMovies = movies;
-        this.popularTvShows = shows;
-        this.popularPersons = persons;
+        this.trendingMovies = movies as Movie[];
+        this.popularTvShows = shows as TvShow[];
+        this.popularPersons = persons as Person[];
+        if (!movies.length && !shows.length) {
+          this.loadError = true;
+        }
         this.loading = false;
         this.cdr.markForCheck();
-
-        // Cargar ratings de MongoDB en paralelo
-        this.loadRatings(movies, shows);
+        this.loadRatings(this.trendingMovies, this.popularTvShows);
       },
       error: (err) => {
         console.error('Error loading home data:', err);
         this.loading = false;
+        this.loadError = true;
         this.cdr.markForCheck();
       }
     });

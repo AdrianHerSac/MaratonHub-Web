@@ -53,7 +53,6 @@ export interface Review {
 export interface CreateReview {
     mediaId: number;
     mediaType: 'Movie' | 'TvShow' | 'Person';
-    userName: string;
     rating: number;
     comment: string;
 }

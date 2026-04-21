@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 export interface Notification {
   id: number;
@@ -24,6 +25,8 @@ export class Navbar {
   isMobileMenuOpen = false;
   isUserDropdownOpen = false;
   isNotificationsPanelOpen = false;
+
+  constructor(public authService: AuthService, private router: Router) {}
 
   user = {
     name: 'Usuario',
@@ -103,7 +106,9 @@ export class Navbar {
 
   logout(): void {
     console.log('Cerrando sesión...');
+    this.authService.logout();
     this.isUserDropdownOpen = false;
+    this.router.navigate(['/']);
   }
 
   toggleNotificationsPanel(): void {

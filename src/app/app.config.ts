@@ -1,13 +1,35 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
-
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
+
+import {
+  SocialAuthServiceConfig,
+  GoogleLoginProvider,
+  SocialAuthService,
+  SOCIAL_AUTH_CONFIG
+} from '@abacritt/angularx-social-login';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient()
+    provideHttpClient(withInterceptors([authInterceptor])),
+    // Proveedor necesario para que SocialAuthService pueda inyectarse
+    SocialAuthService,
+    {
+      provide: SOCIAL_AUTH_CONFIG,
+      useValue: {
+        autoLogin: false,
+        providers: [
+          {
+            id: GoogleLoginProvider.PROVIDER_ID,
+            provider: new GoogleLoginProvider('730092830354-utvto16ef8sgmt0d18d9vf5oplebo00l.apps.googleusercontent.com')
+          }
+        ],
+        onError: (err: any) => console.error(err)
+      } as SocialAuthServiceConfig,
+    }
   ]
 };

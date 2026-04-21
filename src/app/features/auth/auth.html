@@ -1,0 +1,40 @@
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>{{ isLogin ? 'Iniciar Sesión' : 'Registrarse' }}</h2>
+
+        <form (ngSubmit)="onSubmit()" #authForm="ngForm">
+            <div class="form-group">
+                <label for="username">Nombre de Usuario</label>
+                <input type="text" id="username" [(ngModel)]="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" [(ngModel)]="password" name="password" required>
+            </div>
+
+            <button type="submit" class="submit-btn" [disabled]="!authForm.form.valid">
+                {{ isLogin ? 'Entrar' : 'Crear Cuenta' }}
+            </button>
+        </form>
+
+        <div class="divider">
+            <span>O</span>
+        </div>
+
+        <div class="google-btn-container">
+            <asl-google-signin-button type="standard" size="large" ></asl-google-signin-button>
+        </div>
+
+        <p class="toggle-text">
+            {{ isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?' }}
+            <a (click)="toggleMode()">{{ isLogin ? 'Regístrate aquí' : 'Inicia Sesión' }}</a>
+        </p>
+
+        @if (errorMessage) {
+            <div class="error-message">
+                {{ errorMessage }}
+            </div>
+        }
+    </div>
+</div>

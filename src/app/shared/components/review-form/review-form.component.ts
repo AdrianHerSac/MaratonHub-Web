@@ -1,47 +1,44 @@
-import { Component, EventEmitter, Output, Input } from '@angular/core';
+import { Component, EventEmitter, Output, Input, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../core/services/auth.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-review-form',
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RouterLink],
     template: `
     <div class="review-form">
       <h3>Escribe tu opinión</h3>
       
-      <div class="form-group">
-        <label for="userName">Tu nombre</label>
-        <input 
-          id="userName"
-          type="text" 
-          [(ngModel)]="userName" 
-          placeholder="Ingresa tu nombre"
-          class="form-input"
-        />
-      </div>
-
-      <div class="form-group">
-        <label>Calificación</label>
-        <div class="rating-selector">
-          @for (star of [1, 2, 3, 4, 5]; track star) {
-            <button type="button" class="star-button" [class.active]="star <= rating" (click)="setRating(star)">★</button>
-          }
+      @if (authService.isLoggedIn()) {
+        <div class="form-group">
+          <label>Calificación</label>
+          <div class="rating-selector">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <button type="button" class="star-button" [class.active]="star <= rating" (click)="setRating(star)">★</button>
+            }
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="comment">Comentario</label>
-        <textarea
-         id="comment"
-          [(ngModel)]="comment"
-          placeholder="Comparte tu opinión..."
-          rows="4"
-          class="form-textarea"
-        ></textarea>
-      </div>
+        <div class="form-group">
+          <label for="comment">Comentario</label>
+          <textarea
+           id="comment"
+            [(ngModel)]="comment"
+            placeholder="Comparte tu opinión..."
+            rows="4"
+            class="form-textarea"
+          ></textarea>
+        </div>
 
-      <button class="submit-button" (click)="submitReview()" [disabled]="!isValid()">Publicar opinión</button>
-
+        <button class="submit-button" (click)="submitReview()" [disabled]="!isValid()">Publicar opinión</button>
+      } @else {
+        <div class="login-prompt">
+          <p>Debes iniciar sesión para valorar.</p>
+          <a routerLink="/login" class="login-btn">Ir al Login</a>
+        </div>
+      }
     </div>`,
     styles: [`
     .review-form {
@@ -151,18 +148,43 @@ import { CommonModule } from '@angular/common';
       opacity: 0.5;
       cursor: not-allowed;
     }
+
+    .login-prompt {
+      text-align: center;
+      padding: 2rem 0;
+    }
+
+    .login-prompt p {
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+
+    .login-btn {
+      display: inline-block;
+      background: #9333ea;
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .login-btn:hover {
+      background: #7e22ce;
+    }
   `]
 })
 export class ReviewFormComponent {
+    authService = inject(AuthService);
+
     @Input() mediaId!: number;
     @Input() mediaType!: 'Movie' | 'TvShow' | 'Person';
     @Output() reviewSubmitted = new EventEmitter<{
-        userName: string;
         rating: number;
         comment: string;
     }>();
 
-    userName = '';
     rating = 0;
     comment = '';
 
@@ -171,21 +193,18 @@ export class ReviewFormComponent {
     }
 
     isValid(): boolean {
-        return this.userName.trim().length > 0 &&
-            this.rating > 0 &&
+        return this.rating > 0 &&
             this.comment.trim().length > 0;
     }
 
     submitReview() {
         if (this.isValid()) {
             this.reviewSubmitted.emit({
-                userName: this.userName,
                 rating: this.rating,
                 comment: this.comment
             });
 
             // Reset form
-            this.userName = '';
             this.rating = 0;
             this.comment = '';
         }

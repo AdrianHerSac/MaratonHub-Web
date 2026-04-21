@@ -2,9 +2,14 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home';
 import { PeliculasComponent } from './features/movies/peliculas';
 import { MediaDetailComponent } from './features/media-detail/media-detail';
-import {TvShowsComponent} from './features/tv-shows/tv-shows';
+import { TvShowsComponent } from './features/tv-shows/tv-shows';
+import { AuthComponent } from './features/auth/auth';
 
 export const routes: Routes = [
+    {
+      path: 'login',
+      component: AuthComponent
+    },
     {
       path: 'inicio',
       component: HomeComponent
@@ -30,7 +35,12 @@ export const routes: Routes = [
         component: MediaDetailComponent
     },
     {
+        path: '',
+        redirectTo: 'inicio',
+        pathMatch: 'full'
+    },
+    {
         path: '**',
-        redirectTo: ''
+        redirectTo: 'inicio'
     }
 ];

@@ -14,26 +14,14 @@
   <div class="search-bar">
     <div class="search-input-wrapper">
       <span class="search-icon">🔍</span>
-      <input
-        id="movie-search"
-        class="search-input"
-        type="text"
-        placeholder="Buscar película..."
-        [value]="searchQuery"
-        (input)="onSearchInput($event)"
-        autocomplete="off"
-      />
+      <input id="movie-search" class="search-input" type="text" placeholder="Buscar película..." [value]="searchQuery"
+        (input)="onSearchInput($event)" autocomplete="off" />
       @if (searchQuery) {
       <button class="search-clear" (click)="clearSearch()" aria-label="Limpiar búsqueda">✕</button>
       }
     </div>
     <div class="genre-select-wrapper">
-      <select
-        id="genre-select"
-        class="genre-select"
-        [value]="selectedGenreKey"
-        (change)="onGenreChange($event)"
-      >
+      <select id="genre-select" class="genre-select" [value]="selectedGenreKey" (change)="onGenreChange($event)">
         @for (genre of genres; track genre.name) {
         <option [value]="genre.name">{{ genre.emoji }} {{ genre.name }}</option>
         }
@@ -47,6 +35,15 @@
   <div class="loading">
     <div class="spinner"></div>
     <p>Cargando contenido...</p>
+  </div>
+  } @else if (loadError) {
+  <div class="loading">
+    <p style="font-size: 2rem;">⚠️</p>
+    <p>No se pudo conectar con el servidor.</p>
+    <p style="font-size:0.85rem; opacity:0.6;">Comprueba que la API está activa en Render o inténtalo más tarde.</p>
+    <button
+      style="margin-top:1rem; padding:0.5rem 1.5rem; border-radius:8px; background:#7c3aed; color:#fff; border:none; cursor:pointer;"
+      (click)="loadAll()">🔄 Reintentar</button>
   </div>
   } @else {
   <section class="content-section">

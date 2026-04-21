@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Review, CreateReview } from '../models/media.model';
+import { environment } from '../../../environments/environment';
 
 export interface RatingAverage {
     average: number;
@@ -14,7 +15,7 @@ export interface RatingAverage {
     providedIn: 'root'
 })
 export class ReviewService {
-    private apiUrl = 'http://localhost:5000/api/reviews';
+    private apiUrl = `${environment.apiUrl}/reviews`;
 
     constructor(private http: HttpClient) { }
 

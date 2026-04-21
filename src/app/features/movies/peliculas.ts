@@ -3,8 +3,8 @@ import { CommonModule, DatePipe } from "@angular/common";
 import { Movie } from '../../core/models/media.model';
 import { TmdbApiService } from '../../core/services/tmdb-api.service';
 import { ReviewService } from '../../core/services/review.service';
-import { forkJoin, Subject } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { forkJoin, Subject, TimeoutError } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, switchMap, timeout } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { RouterModule } from '@angular/router';
 import { MovieCarousel } from '../../shared/components/movie-carousel/movie-carousel';
@@ -30,6 +30,7 @@ export class PeliculasComponent implements OnInit, OnDestroy {
   loading = true;
   genreLoading = false;
   searchLoading = false;
+  loadError = false;
 
   // Búsqueda por texto
   searchQuery = '';
@@ -104,20 +105,25 @@ export class PeliculasComponent implements OnInit, OnDestroy {
 
   loadAll() {
     this.loading = true;
+    this.loadError = false;
     forkJoin({
-      trending: this.tmdbService.getTrendingMovies(),
-      popular: this.tmdbService.getPopularMovies()
+      trending: this.tmdbService.getTrendingMovies().pipe(timeout(20000), catchError(() => of([]))),
+      popular: this.tmdbService.getPopularMovies().pipe(timeout(20000), catchError(() => of([])))
     }).subscribe({
       next: ({ trending, popular }) => {
-        this.trendingMovies = trending;
-        this.popularMovies = popular;
+        this.trendingMovies = trending as Movie[];
+        this.popularMovies = popular as Movie[];
+        if (!trending.length && !popular.length) {
+          this.loadError = true;
+        }
         this.loading = false;
         this.cdr.markForCheck();
-        this.loadRatingBatch(trending, this.trendingRatings);
-        this.loadRatingBatch(popular, this.popularRatings);
+        this.loadRatingBatch(this.trendingMovies, this.trendingRatings);
+        this.loadRatingBatch(this.popularMovies, this.popularRatings);
       },
       error: () => {
         this.loading = false;
+        this.loadError = true;
         this.cdr.markForCheck();
       }
     });

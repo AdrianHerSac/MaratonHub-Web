@@ -95,7 +95,7 @@ export class MediaDetailComponent implements OnInit {
     });
   }
 
-  onReviewSubmitted(reviewData: { userName: string; rating: number; comment: string }) {
+  onReviewSubmitted(reviewData: { rating: number; comment: string }) {
     const mediaTypeMap = { 'movie': 'Movie', 'tv': 'TvShow', 'person': 'Person' };
 
     this.reviewService.createReview({

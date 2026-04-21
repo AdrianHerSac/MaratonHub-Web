@@ -30,6 +30,13 @@
     <div class="spinner"></div>
     <p>Cargando contenido...</p>
   </div>
+  } @else if (loadError) {
+  <div class="loading">
+    <p style="font-size: 2rem;">⚠️</p>
+    <p>No se pudo conectar con el servidor.</p>
+    <p style="font-size:0.85rem; opacity:0.6;">La API puede estar arrancando (cold start). Espera unos segundos e inténtalo de nuevo.</p>
+    <button style="margin-top:1rem; padding:0.5rem 1.5rem; border-radius:8px; background:#7c3aed; color:#fff; border:none; cursor:pointer;" (click)="loadData()">🔄 Reintentar</button>
+  </div>
   } @else if (searchQuery.length > 1) {
 
   <!-- Resultados de búsqueda global -->

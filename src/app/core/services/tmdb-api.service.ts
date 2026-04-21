@@ -3,27 +3,29 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
 import { Movie, TvShow, Person } from '../models/media.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class TmdbApiService {
-    private apiUrl = 'http://localhost:5163/api';
+  // 1. Cambiamos el nombre aquí para que coincida con el resto
+  private apiUrl = environment.apiUrl;
 
-    // Cacheamos las peticiones más usadas para no repetir llamadas HTTP
-    private trendingMovies$: Observable<Movie[]>;
-    private popularTvShows$: Observable<TvShow[]>;
-    private popularPersons$: Observable<Person[]>;
+  private trendingMovies$: Observable<Movie[]>;
+  private popularTvShows$: Observable<TvShow[]>;
+  private popularPersons$: Observable<Person[]>;
 
-    constructor(private http: HttpClient) {
-        this.trendingMovies$ = this.http.get<Movie[]>(`${this.apiUrl}/movies/trending`).pipe(shareReplay(1));
-        this.popularTvShows$ = this.http.get<TvShow[]>(`${this.apiUrl}/tvshows/popular`).pipe(shareReplay(1));
-        this.popularPersons$ = this.http.get<Person[]>(`${this.apiUrl}/persons/popular`).pipe(shareReplay(1));
-    }
+  constructor(private http: HttpClient) {
+    // Ahora 'this.apiUrl' ya existe y no dará error
+    this.trendingMovies$ = this.http.get<Movie[]>(`${this.apiUrl}/movies/trending`).pipe(shareReplay(1));
+    this.popularTvShows$ = this.http.get<TvShow[]>(`${this.apiUrl}/tvshows/popular`).pipe(shareReplay(1));
+    this.popularPersons$ = this.http.get<Person[]>(`${this.apiUrl}/persons/popular`).pipe(shareReplay(1));
+  }
 
     // Movies
     getTrendingMovies(): Observable<Movie[]> {
-        return this.trendingMovies$;
+      return this.http.get<Movie[]>(`${this.apiUrl}/movies/trending`).pipe(shareReplay(1));
     }
 
     getPopularMovies(): Observable<Movie[]> {
