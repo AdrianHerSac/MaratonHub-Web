@@ -4,6 +4,8 @@ import { PeliculasComponent } from './features/movies/peliculas';
 import { MediaDetailComponent } from './features/media-detail/media-detail';
 import { TvShowsComponent } from './features/tv-shows/tv-shows';
 import { AuthComponent } from './features/auth/auth';
+import { authGuard } from './core/guards/auth.guard';
+import { MiListaComponent } from './features/mi-lista/mi-lista';
 
 export const routes: Routes = [
     {
@@ -33,6 +35,11 @@ export const routes: Routes = [
     {
         path: 'person/:id',
         component: MediaDetailComponent
+    },
+    {
+        path: 'mi-lista',
+        component: MiListaComponent,
+        canActivate: [authGuard]
     },
     {
         path: '',
