@@ -2,6 +2,7 @@ import { Injectable, signal, WritableSignal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { SocialAuthService } from '@abacritt/angularx-social-login';
 
 export interface UserInfo {
   username: string;
@@ -22,7 +23,10 @@ export class AuthService {
 
   public currentUser: WritableSignal<UserInfo | null> = signal(null);
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private socialAuthService: SocialAuthService
+  ) {
     this.loadUserFromStorage();
   }
 
@@ -61,6 +65,11 @@ export class AuthService {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     this.currentUser.set(null);
+    try {
+      this.socialAuthService.signOut().catch(() => {});
+    } catch (error) {
+      console.error('Error signing out from Google:', error);
+    }
   }
 
   private handleAuthSuccess(response: AuthResponse) {
