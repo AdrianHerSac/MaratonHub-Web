@@ -28,8 +28,9 @@ export class TmdbApiService {
       return this.http.get<Movie[]>(`${this.apiUrl}/movies/trending`).pipe(shareReplay(1));
     }
 
-    getPopularMovies(): Observable<Movie[]> {
-        return this.http.get<Movie[]>(`${this.apiUrl}/movies/popular`);
+    getPopularMovies(page: number = 1): Observable<Movie[]> {
+        const params = new HttpParams().set('page', page.toString());
+        return this.http.get<Movie[]>(`${this.apiUrl}/movies/popular`, { params });
     }
 
     getMoviesByGenre(genreId: number): Observable<Movie[]> {
@@ -45,13 +46,19 @@ export class TmdbApiService {
         return this.http.get<Movie>(`${this.apiUrl}/movies/${id}`);
     }
 
+    getTopRatedMovies(page: number = 1): Observable<Movie[]> {
+        const params = new HttpParams().set('page', page.toString());
+        return this.http.get<Movie[]>(`${this.apiUrl}/movies/top-rated`, { params });
+    }
+
     // TV Shows
     getTrendingTvShows(): Observable<TvShow[]> {
         return this.http.get<TvShow[]>(`${this.apiUrl}/tvshows/trending`);
     }
 
-    getPopularTvShows(): Observable<TvShow[]> {
-        return this.popularTvShows$;
+    getPopularTvShows(page: number = 1): Observable<TvShow[]> {
+        const params = new HttpParams().set('page', page.toString());
+        return this.http.get<TvShow[]>(`${this.apiUrl}/tvshows/popular`, { params });
     }
 
     searchTvShows(query: string): Observable<TvShow[]> {
@@ -61,6 +68,11 @@ export class TmdbApiService {
 
     getTvShowDetails(id: number): Observable<TvShow> {
         return this.http.get<TvShow>(`${this.apiUrl}/tvshows/${id}`);
+    }
+
+    getTopRatedTvShows(page: number = 1): Observable<TvShow[]> {
+        const params = new HttpParams().set('page', page.toString());
+        return this.http.get<TvShow[]>(`${this.apiUrl}/tvshows/top-rated`, { params });
     }
 
     // Persons
@@ -79,6 +91,8 @@ export class TmdbApiService {
 
     // Helper to get image URL
     getImageUrl(path: string, size: string = 'w500'): string {
-        return path ? `https://image.tmdb.org/t/p/${size}${path}` : '';
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        return `https://image.tmdb.org/t/p/${size}${path}`;
     }
 }

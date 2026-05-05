@@ -1,0 +1,43 @@
+<div class="top-rated-container">
+  <header class="page-header">
+    <h1 class="logo-gradient">Top Rated</h1>
+    <p class="subtitle">Las películas y series más valoradas por nuestra comunidad</p>
+  </header>
+
+  <div *ngIf="isLoading() && displayedMedia.length === 0" class="loader-container">
+    <div class="loader"></div>
+  </div>
+
+  <div class="media-grid">
+    <div *ngFor="let item of displayedMedia" class="media-card" [routerLink]="['/' + item.mediaType, item.id]">
+      <div class="poster-wrapper">
+        <img [src]="getImageUrl(item.posterPath)" [alt]="item.title || item.name">
+        <div class="rating-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"
+            stroke="none">
+            <polygon
+              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+            </polygon>
+          </svg>
+          {{ item.voteAverage | number:'1.1-1' }}
+        </div>
+      </div>
+      <div class="media-info">
+        <h3>{{ item.title || item.name }}</h3>
+        <span class="media-type" [class.movie]="item.mediaType === 'movie'">
+          {{ item.mediaType === 'movie' ? 'Película' : 'Serie' }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="displayedMedia.length < allMedia.length" class="load-more-wrapper">
+    <button class="btn-load-more" (click)='loadMore()'>
+      <span>Mostrar 40 más</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </button>
+  </div>
+</div>

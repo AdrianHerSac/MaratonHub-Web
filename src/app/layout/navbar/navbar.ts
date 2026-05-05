@@ -90,17 +90,17 @@ export class Navbar {
   }
 
   goToProfile(): void {
-    console.log('Ir al perfil');
+    this.router.navigate(['/perfil'], { queryParams: { tab: 'perfil' } });
     this.isUserDropdownOpen = false;
   }
 
   goToRatings(): void {
-    console.log('Ir a mis valoraciones');
+    this.router.navigate(['/perfil'], { queryParams: { tab: 'valoraciones' } });
     this.isUserDropdownOpen = false;
   }
 
   goToSettings(): void {
-    console.log('Ir a configuración');
+    this.router.navigate(['/perfil'], { queryParams: { tab: 'configuracion' } });
     this.isUserDropdownOpen = false;
   }
 
