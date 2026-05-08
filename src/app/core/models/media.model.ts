@@ -42,6 +42,7 @@ export interface Genre {
 
 export interface Review {
     id?: string;
+    userId: string;
     mediaId: number;
     mediaType: 'Movie' | 'TvShow' | 'Person';
     userName: string;

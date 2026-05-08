@@ -1,0 +1,147 @@
+<div class="mi-lista-page">
+
+  <!-- Hero Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-icon">📋</div>
+      <div>
+        <h1>Mi Lista</h1>
+        <p class="subtitle">Todas tus valoraciones y opiniones</p>
+      </div>
+    </div>
+
+    @if (!loading && reviews.length > 0) {
+    <div class="stats-bar">
+      <div class="stat">
+        <span class="stat-value">{{ reviews.length }}</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value">{{ movieReviews.length }}</span>
+        <span class="stat-label">Películas</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value">{{ tvReviews.length }}</span>
+        <span class="stat-label">Series</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value">{{ averageRating.toFixed(1) }}⭐</span>
+        <span class="stat-label">Media</span>
+      </div>
+    </div>
+    }
+  </div>
+
+  <div class="content">
+
+    <!-- Panel de herramientas de reparación (solo usuarios autenticados) -->
+    @if (authService.isLoggedIn()) {
+    <div class="tools-panel">
+      <div class="tools-header">
+        <span class="tools-icon">🔧</span>
+        <span class="tools-title">Herramientas</span>
+      </div>
+      <div class="tools-actions">
+        <button class="tool-btn fix-btn" (click)="fixUnknownReviews()" [disabled]="fixStatus === 'loading'">
+          @if (fixStatus === 'loading') {
+          ⏳ Reparando...
+          } @else {
+          🔄 Reparar reviews "Unknown"
+          }
+        </button>
+        <button class="tool-btn debug-btn" (click)="showDebugClaims()">
+          🔍 Ver claims JWT (debug)
+        </button>
+      </div>
+      @if (fixStatus === 'done') {
+      <p class="fix-result success">✅ {{ fixMessage }}</p>
+      }
+      @if (fixStatus === 'error') {
+      <p class="fix-result error">❌ {{ fixMessage }}</p>
+      }
+    </div>
+    }
+
+    <!-- Loading -->
+    @if (loading) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Cargando tus valoraciones...</p>
+    </div>
+    }
+
+    <!-- Not logged in -->
+    @else if (!authService.isLoggedIn()) {
+    <div class="empty-state">
+      <div class="empty-icon">🔐</div>
+      <h2>Inicia sesión para ver tu lista</h2>
+      <p>Necesitas una cuenta para guardar y ver tus valoraciones.</p>
+      <a routerLink="/login" class="cta-btn">Iniciar Sesión</a>
+    </div>
+    }
+
+    <!-- Error -->
+    @else if (error) {
+    <div class="empty-state">
+      <div class="empty-icon">⚠️</div>
+      <h2>No se pudieron cargar tus valoraciones</h2>
+      <p>Hubo un problema al conectar con el servidor.</p>
+    </div>
+    }
+
+    <!-- Empty -->
+    @else if (reviews.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🎬</div>
+      <h2>Aún no has valorado nada</h2>
+      <p>Explora películas y series y comparte tu opinión.</p>
+      <div class="empty-actions">
+        <a routerLink="/movies" class="cta-btn">Ver Películas</a>
+        <a routerLink="/tv" class="cta-btn cta-secondary">Ver Series</a>
+      </div>
+    </div>
+    }
+
+    <!-- Reviews list -->
+    @else {
+    <div class="reviews-grid">
+      @for (review of reviews; track review.id) {
+      <a [routerLink]="getMediaRoute(review)" class="review-card">
+
+        <div class="card-header">
+          <span class="media-badge" [class.movie-badge]="review.mediaType === 'Movie'"
+            [class.tv-badge]="review.mediaType === 'TvShow'">
+            {{ getMediaTypeLabel(review.mediaType) }}
+          </span>
+          <span class="review-date">{{ formatDate(review.createdAt) }}</span>
+        </div>
+
+        <div class="card-id">
+          <span class="media-id">#{{ review.mediaId }}</span>
+        </div>
+
+        <div class="card-rating">
+          @for (star of getStars(review.rating); track star) {
+          <span class="star" [class.filled]="star <= review.rating">★</span>
+          }
+          <span class="rating-num">{{ review.rating }}/5</span>
+        </div>
+
+        @if (review.comment) {
+        <p class="card-comment">"{{ review.comment }}"</p>
+        }
+
+        <div class="card-footer">
+          <span class="view-link">Ver detalles →</span>
+        </div>
+
+      </a>
+      }
+    </div>
+    }
+
+  </div>
+</div>

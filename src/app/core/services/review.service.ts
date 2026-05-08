@@ -44,4 +44,14 @@ export class ReviewService {
     deleteReview(id: string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
+
+    // Debug: ver los claims del token tal como los ve el servidor
+    debugClaims(): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/debug-claims`);
+    }
+
+    // Reparar reviews "Unknown" del usuario autenticado con su nombre real
+    fixUnknownReviews(): Observable<{ message: string }> {
+        return this.http.post<{ message: string }>(`${this.apiUrl}/fix-unknown`, {});
+    }
 }
