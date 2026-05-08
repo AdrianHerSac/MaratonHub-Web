@@ -1,88 +1,115 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
-import { ReviewService } from '../../core/services/review.service';
 import { AuthService } from '../../core/services/auth.service';
-import { TmdbApiService } from '../../core/services/tmdb-api.service';
+import { ReviewService } from '../../core/services/review.service';
 import { Review } from '../../core/models/media.model';
-
-interface RatedMedia {
-  review: Review;
-  title: string;
-  posterUrl: string;
-}
 
 @Component({
   selector: 'app-mi-lista',
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './mi-lista.html',
-  styleUrl: './mi-lista.css'
+  styleUrl: './mi-lista.css',
 })
 export class MiListaComponent implements OnInit {
-  ratedItems: RatedMedia[] = [];
-  isLoading = true;
+  reviews: Review[] = [];
+  loading = true;
+  error = false;
+  fixStatus: 'idle' | 'loading' | 'done' | 'error' = 'idle';
+  fixMessage = '';
+  debugClaims: any = null;
 
   constructor(
-    private reviewService: ReviewService,
     public authService: AuthService,
-    private tmdbService: TmdbApiService
+    private reviewService: ReviewService
   ) {}
 
-  ngOnInit(): void {
-    const user = this.authService.currentUser();
-    if (user?.username) {
-      this.loadUserReviews(user.username);
+  ngOnInit() {
+    this.loadReviews();
+  }
+
+  loadReviews() {
+    const username = this.authService.currentUser()?.username;
+    if (username) {
+      this.loading = true;
+      this.reviewService.getReviewsByUser(username).subscribe({
+        next: (reviews) => {
+          this.reviews = reviews.sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          this.loading = false;
+        },
+        error: () => {
+          this.error = true;
+          this.loading = false;
+        }
+      });
     } else {
-      this.isLoading = false;
+      this.loading = false;
     }
   }
 
-  loadUserReviews(username: string) {
-    this.reviewService.getReviewsByUser(username).pipe(
-      switchMap(reviews => {
-        if (!reviews || reviews.length === 0) {
-          return of([]);
-        }
-        
-        const mediaRequests = reviews.map(review => {
-          if (review.mediaType === 'Movie') {
-            return this.tmdbService.getMovieDetails(review.mediaId).pipe(
-              map(movie => ({
-                review,
-                title: movie.title,
-                posterUrl: this.tmdbService.getImageUrl(movie.posterPath || '')
-              }))
-            );
-          } else if (review.mediaType === 'TvShow') {
-             return this.tmdbService.getTvShowDetails(review.mediaId).pipe(
-              map(tvShow => ({
-                review,
-                title: tvShow.name,
-                posterUrl: this.tmdbService.getImageUrl(tvShow.posterPath || '')
-              }))
-            );
-          }
-          return of(null);
-        });
-
-        return forkJoin(mediaRequests);
-      })
-    ).subscribe({
-      next: (results) => {
-        this.ratedItems = results.filter(item => item !== null) as RatedMedia[];
-        // Ordenar por las valoraciones más recientes
-        this.ratedItems.sort((a, b) => {
-           return new Date(b.review.createdAt).getTime() - new Date(a.review.createdAt).getTime();
-        });
-        this.isLoading = false;
+  fixUnknownReviews() {
+    this.fixStatus = 'loading';
+    this.reviewService.fixUnknownReviews().subscribe({
+      next: (res) => {
+        this.fixStatus = 'done';
+        this.fixMessage = res.message;
+        this.loadReviews();
       },
       error: (err) => {
-        console.error('Error loading reviews:', err);
-        this.isLoading = false;
+        this.fixStatus = 'error';
+        this.fixMessage = 'Error: ' + (err.error?.message || err.message);
       }
     });
+  }
+
+  showDebugClaims() {
+    this.reviewService.debugClaims().subscribe({
+      next: (data) => {
+        this.debugClaims = data;
+        console.log('DEBUG CLAIMS:', JSON.stringify(data, null, 2));
+        alert('Claims en consola del navegador (F12):\n' + JSON.stringify(data.claims, null, 2));
+      },
+      error: (err) => console.error('Error debug claims:', err)
+    });
+  }
+
+  getMediaRoute(review: Review): string {
+    if (review.mediaType === 'Movie') return `/movie/${review.mediaId}`;
+    if (review.mediaType === 'TvShow') return `/tv/${review.mediaId}`;
+    return `/person/${review.mediaId}`;
+  }
+
+  getMediaTypeLabel(mediaType: string): string {
+    if (mediaType === 'Movie') return 'Película';
+    if (mediaType === 'TvShow') return 'Serie';
+    return 'Persona';
+  }
+
+  getStars(rating: number): number[] {
+    return [1, 2, 3, 4, 5];
+  }
+
+  formatDate(date: Date): string {
+    return new Date(date).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  get movieReviews(): Review[] {
+    return this.reviews.filter(r => r.mediaType === 'Movie');
+  }
+
+  get tvReviews(): Review[] {
+    return this.reviews.filter(r => r.mediaType === 'TvShow');
+  }
+
+  get averageRating(): number {
+    if (this.reviews.length === 0) return 0;
+    return this.reviews.reduce((acc, r) => acc + r.rating, 0) / this.reviews.length;
   }
 }

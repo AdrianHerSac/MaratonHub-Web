@@ -18,6 +18,7 @@ export interface Notification {
   imports: [FormsModule, CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
+  standalone: true
 })
 
 export class Navbar {
@@ -90,12 +91,12 @@ export class Navbar {
   }
 
   goToProfile(): void {
-    this.router.navigate(['/perfil'], { queryParams: { tab: 'perfil' } });
+    this.router.navigate(['/perfil']);
     this.isUserDropdownOpen = false;
   }
 
   goToRatings(): void {
-    this.router.navigate(['/perfil'], { queryParams: { tab: 'valoraciones' } });
+    this.router.navigate(['/mi-lista']);
     this.isUserDropdownOpen = false;
   }
 

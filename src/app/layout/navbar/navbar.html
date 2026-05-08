@@ -127,15 +127,15 @@
 
                       <div *ngIf="isUserDropdownOpen"
                           class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl py-2 border border-gray-700">
-                          <a (click)="goToProfile()"
+                          <a routerLink="/profile" (click)="isUserDropdownOpen = false"
                               class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200 cursor-pointer">
                               Mi Perfil
                           </a>
-                          <a (click)="goToRatings()"
+                          <a routerLink="/mi-lista" (click)="isUserDropdownOpen = false"
                               class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200 cursor-pointer">
                               Mis Valoraciones
                           </a>
-                          <a (click)="goToSettings()"
+                          <a (click)="isUserDropdownOpen = false"
                               class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200 cursor-pointer">
                               Configuración
                           </a>
