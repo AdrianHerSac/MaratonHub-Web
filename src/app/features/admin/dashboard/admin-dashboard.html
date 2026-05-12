@@ -1,0 +1,133 @@
+<div class="min-h-screen bg-[#0f172a] text-white p-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
+      <div>
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+          Panel de Administración
+        </h1>
+        <p class="text-gray-400 mt-2">Bienvenido al centro de control de MaratonHub</p>
+      </div>
+      <div class="flex gap-4">
+        <button (click)="loadStats()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Actualizar
+        </button>
+        <a routerLink="/admin/users" class="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+          Gestionar Usuarios
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div *ngIf="!loading && stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <!-- Stat Card 1 -->
+      <div class="glass-card p-6 rounded-2xl border border-gray-800 bg-gray-900/40 backdrop-blur-xl">
+        <div class="flex items-center justify-between mb-4">
+          <div class="p-3 bg-blue-500/10 rounded-lg text-blue-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+          <span class="text-green-400 text-xs font-bold">+12%</span>
+        </div>
+        <h3 class="text-gray-400 text-sm font-medium">Total Usuarios</h3>
+        <p class="text-3xl font-bold mt-1">{{ stats.totalUsers }}</p>
+      </div>
+
+      <!-- Stat Card 2 -->
+      <div class="glass-card p-6 rounded-2xl border border-gray-800 bg-gray-900/40 backdrop-blur-xl">
+        <div class="flex items-center justify-between mb-4">
+          <div class="p-3 bg-purple-500/10 rounded-lg text-purple-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+            </svg>
+          </div>
+          <span class="text-green-400 text-xs font-bold">+8%</span>
+        </div>
+        <h3 class="text-gray-400 text-sm font-medium">Total Reseñas</h3>
+        <p class="text-3xl font-bold mt-1">{{ stats.totalReviews }}</p>
+      </div>
+
+      <!-- Stat Card 3 -->
+      <div class="glass-card p-6 rounded-2xl border border-gray-800 bg-gray-900/40 backdrop-blur-xl">
+        <div class="flex items-center justify-between mb-4">
+          <div class="p-3 bg-amber-500/10 rounded-lg text-amber-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <span class="text-gray-400 text-xs">Latencia: 45ms</span>
+        </div>
+        <h3 class="text-gray-400 text-sm font-medium">Estado Sistema</h3>
+        <p class="text-3xl font-bold mt-1 text-green-400">{{ stats.systemStatus }}</p>
+      </div>
+
+      <!-- Stat Card 4 -->
+      <div class="glass-card p-6 rounded-2xl border border-gray-800 bg-gray-900/40 backdrop-blur-xl">
+        <div class="flex items-center justify-between mb-4">
+          <div class="p-3 bg-pink-500/10 rounded-lg text-pink-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <h3 class="text-gray-400 text-sm font-medium">Última Actualización</h3>
+        <p class="text-lg font-bold mt-1">{{ stats.lastUpdate | date:'HH:mm:ss' }}</p>
+        <p class="text-xs text-gray-500">{{ stats.lastUpdate | date:'dd/MM/yyyy' }}</p>
+      </div>
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div *ngIf="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
+      <div *ngFor="let i of [1,2,3,4]" class="h-40 bg-gray-800/50 rounded-2xl"></div>
+    </div>
+
+    <!-- Quick Actions / Info Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2 glass-card p-8 rounded-2xl bg-gray-900/40 border border-gray-800">
+        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+          <span class="w-2 h-6 bg-purple-500 rounded-full"></span>
+          Actividad Reciente
+        </h2>
+        <div class="space-y-4">
+          <div *ngFor="let i of [1,2,3]" class="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-800/30 transition-colors border border-transparent hover:border-gray-700">
+            <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400">
+              {{ i }}
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-white">Nuevo usuario registrado</p>
+              <p class="text-xs text-gray-500">Hace {{ i * 5 }} minutos</p>
+            </div>
+            <span class="px-2 py-1 bg-green-500/10 text-green-500 text-[10px] font-bold rounded uppercase">Éxito</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-8 rounded-2xl bg-gray-900/40 border border-gray-800">
+        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+          <span class="w-2 h-6 bg-pink-500 rounded-full"></span>
+          Información API
+        </h2>
+        <div class="space-y-6">
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-wider mb-2">Endpoint de Stats</p>
+            <code class="block p-3 bg-black/40 rounded-lg text-purple-400 text-xs">GET /api/admin/stats</code>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-wider mb-2">Endpoint de Usuarios</p>
+            <code class="block p-3 bg-black/40 rounded-lg text-purple-400 text-xs">GET /api/admin/users</code>
+          </div>
+          <div class="pt-4 border-t border-gray-800">
+            <p class="text-sm text-gray-400 italic">"Con gran poder viene una gran responsabilidad."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

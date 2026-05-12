@@ -9,6 +9,9 @@ export interface Movie {
     voteCount: number;
     originalLanguage?: string;
     genres: Genre[];
+    cast: CastMember[];
+    director?: string;
+    videos: Video[];
 }
 
 export interface TvShow {
@@ -22,6 +25,27 @@ export interface TvShow {
     voteCount: number;
     originalLanguage?: string;
     genres: Genre[];
+    numberOfSeasons?: number;
+    numberOfEpisodes?: number;
+    status?: string;
+    cast: CastMember[];
+    director?: string;
+    videos: Video[];
+}
+
+export interface CastMember {
+    id: number;
+    name: string;
+    character: string;
+    profilePath?: string;
+}
+
+export interface Video {
+    id: string;
+    key: string;
+    name: string;
+    site: string;
+    type: string;
 }
 
 export interface Person {

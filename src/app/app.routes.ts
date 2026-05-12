@@ -5,6 +5,11 @@ import { MediaDetailComponent } from './features/media-detail/media-detail';
 import { TvShowsComponent } from './features/tv-shows/tv-shows';
 import { AuthComponent } from './features/auth/auth';
 import { MiListaComponent } from './features/mi-lista/mi-lista';
+import { AdminDashboardComponent } from './features/admin/dashboard/admin-dashboard';
+import { UserManagementComponent } from './features/admin/users/user-management';
+import { adminGuard } from './core/guards/admin.guard';
+import { Profile } from './features/profile/profile';
+import { authGuard } from './core/guards/auth.guard';
 
 
 export const routes: Routes = [
@@ -38,7 +43,23 @@ export const routes: Routes = [
     },
     {
         path: 'mi-lista',
-        component: MiListaComponent
+        component: MiListaComponent,
+        canActivate: [authGuard]
+    },
+    {
+        path: 'profile',
+        component: Profile,
+        canActivate: [authGuard]
+    },
+    {
+        path: 'admin',
+        component: AdminDashboardComponent,
+        canActivate: [adminGuard]
+    },
+    {
+        path: 'admin/users',
+        component: UserManagementComponent,
+        canActivate: [adminGuard]
     },
     {
         path: '',

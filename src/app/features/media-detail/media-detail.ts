@@ -1,10 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { combineLatest } from 'rxjs';
 import { TmdbApiService } from '../../core/services/tmdb-api.service';
 import { ReviewService } from '../../core/services/review.service';
-import { Movie, TvShow, Person, Review } from '../../core/models/media.model';
+import { Movie, TvShow, Person, Review, Video, CastMember } from '../../core/models/media.model';
 import { ReviewFormComponent } from '../../shared/components/review-form/review-form.component';
 import { ReviewListComponent } from '../../shared/components/review-list/review-list.component';
 
@@ -25,7 +26,8 @@ export class MediaDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private tmdbService: TmdbApiService,
     private reviewService: ReviewService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private sanitizer: DomSanitizer
   ) { }
 
   ngOnInit() {
@@ -128,17 +130,40 @@ export class MediaDetailComponent implements OnInit {
     return this.tmdbService.getImageUrl(path || '', 'w500');
   }
 
+  getActorImageUrl(path: string | undefined): string {
+    return this.tmdbService.getImageUrl(path || '', 'w185');
+  }
+
+  getTrailerUrl(): SafeResourceUrl | null {
+    if (!this.media || !('videos' in this.media)) return null;
+    const trailer = this.media.videos.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+    if (trailer) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube.com/embed/${trailer.key}`);
+    }
+    return null;
+  }
+
   isMovie(media: any): media is Movie {
-    return 'title' in media;
+    return media && 'title' in media;
   }
 
   isTvShow(media: any): media is TvShow {
-    return 'name' in media && 'firstAirDate' in media;
+    return media && 'name' in media && 'firstAirDate' in media;
   }
 
   isPerson(media: any): media is Person {
-    return 'biography' in media;
+    return media && 'biography' in media;
   }
+
+  getCast(): CastMember[] {
+    if (!this.media || !('cast' in this.media)) return [];
+    return (this.media as Movie | TvShow).cast || [];
+  }
+
+  hasTrailer(): boolean {
+    return this.getTrailerUrl() !== null;
+  }
+
 
   getAverageUserRating(): number {
     if (!this.reviews || this.reviews.length === 0) return 0;
