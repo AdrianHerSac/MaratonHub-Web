@@ -16,9 +16,6 @@ export class MiListaComponent implements OnInit {
   reviews: Review[] = [];
   loading = true;
   error = false;
-  fixStatus: 'idle' | 'loading' | 'done' | 'error' = 'idle';
-  fixMessage = '';
-  debugClaims: any = null;
 
   constructor(
     public authService: AuthService,
@@ -50,32 +47,6 @@ export class MiListaComponent implements OnInit {
     }
   }
 
-  fixUnknownReviews() {
-    this.fixStatus = 'loading';
-    this.reviewService.fixUnknownReviews().subscribe({
-      next: (res) => {
-        this.fixStatus = 'done';
-        this.fixMessage = res.message;
-        this.loadReviews();
-      },
-      error: (err) => {
-        this.fixStatus = 'error';
-        this.fixMessage = 'Error: ' + (err.error?.message || err.message);
-      }
-    });
-  }
-
-  showDebugClaims() {
-    this.reviewService.debugClaims().subscribe({
-      next: (data) => {
-        this.debugClaims = data;
-        console.log('DEBUG CLAIMS:', JSON.stringify(data, null, 2));
-        alert('Claims en consola del navegador (F12):\n' + JSON.stringify(data.claims, null, 2));
-      },
-      error: (err) => console.error('Error debug claims:', err)
-    });
-  }
-
   getMediaRoute(review: Review): string {
     if (review.mediaType === 'Movie') return `/movie/${review.mediaId}`;
     if (review.mediaType === 'TvShow') return `/tv/${review.mediaId}`;
@@ -86,10 +57,6 @@ export class MiListaComponent implements OnInit {
     if (mediaType === 'Movie') return 'Película';
     if (mediaType === 'TvShow') return 'Serie';
     return 'Persona';
-  }
-
-  getStars(rating: number): number[] {
-    return [1, 2, 3, 4, 5];
   }
 
   formatDate(date: Date): string {

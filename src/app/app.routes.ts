@@ -4,10 +4,8 @@ import { PeliculasComponent } from './features/movies/peliculas';
 import { MediaDetailComponent } from './features/media-detail/media-detail';
 import { TvShowsComponent } from './features/tv-shows/tv-shows';
 import { AuthComponent } from './features/auth/auth';
-import { authGuard } from './core/guards/auth.guard';
 import { MiListaComponent } from './features/mi-lista/mi-lista';
-import { Profile } from './features/profile/profile';
-import { TopRatedComponent } from './features/top-rated/top-rated';
+
 
 export const routes: Routes = [
     {
@@ -40,17 +38,7 @@ export const routes: Routes = [
     },
     {
         path: 'mi-lista',
-        component: MiListaComponent,
-        canActivate: [authGuard]
-    },
-    {
-        path: 'perfil',
-        component: Profile,
-        canActivate: [authGuard]
-    },
-    {
-        path: 'top-rated',
-        component: TopRatedComponent
+        component: MiListaComponent
     },
     {
         path: '',

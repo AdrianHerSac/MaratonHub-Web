@@ -118,6 +118,7 @@
                               {{authService.currentUser()?.username?.[0] || 'U'}}
                           </div>
                           <span class="text-white hidden sm:block">{{ authService.currentUser()?.username }}</span>
+                          <span *ngIf="authService.isAdmin()" class="ml-2 px-1.5 py-0.5 rounded bg-amber-500 text-[10px] font-bold text-white uppercase tracking-wider">Admin</span>
                           <svg class="w-4 h-4 text-gray-400 transition-transform" [class.rotate-180]="isUserDropdownOpen"
                               fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
@@ -131,11 +132,15 @@
                               class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200 cursor-pointer">
                               Mi Perfil
                           </a>
+                          <a *ngIf="authService.isAdmin()" routerLink="/admin" (click)="isUserDropdownOpen = false"
+                              class="block px-4 py-2 text-sm text-amber-400 hover:bg-gray-700 hover:text-amber-300 transition-colors duration-200 cursor-pointer font-semibold">
+                              Panel Admin
+                          </a>
                           <a routerLink="/mi-lista" (click)="isUserDropdownOpen = false"
                               class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200 cursor-pointer">
                               Mis Valoraciones
                           </a>
-                          <a (click)="isUserDropdownOpen = false"
+                          <a routerLink="/profile" [queryParams]="{tab: 'settings'}" (click)="isUserDropdownOpen = false"
                               class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200 cursor-pointer">
                               Configuración
                           </a>

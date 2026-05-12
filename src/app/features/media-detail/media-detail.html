@@ -5,6 +5,7 @@
         <p>Cargando...</p>
     </div>
     } @else if (media) {
+
     <!-- Hero Section with Backdrop -->
     <div class="hero" [style.backgroundImage]="'url(' + getBackdropUrl() + ')'">
         <div class="hero-overlay"></div>
@@ -79,15 +80,46 @@
         </div>
     </div>
 
-    <!-- Reviews Section -->
-    <div class="reviews-section">
-        <div class="container">
+    <!-- Main Content Section -->
+    <div class="main-content">
+
+        <!-- Cast Section -->
+        @if (getCast().length > 0) {
+        <div class="detail-section">
+            <h2 class="section-title">Reparto Principal</h2>
+            <div class="cast-grid">
+                @for (actor of getCast().slice(0, 8); track actor.id) {
+                <div class="cast-card">
+                    <div class="actor-img-wrapper">
+                        <img [src]="getActorImageUrl(actor.profilePath)" [alt]="actor.name" class="actor-img" />
+                    </div>
+                    <p class="actor-name">{{ actor.name }}</p>
+                    <p class="actor-character">{{ actor.character }}</p>
+                </div>
+                }
+            </div>
+        </div>
+        }
+
+        <!-- Trailer Section -->
+        @if (hasTrailer()) {
+        <div class="detail-section">
+            <h2 class="section-title">Trailer Oficial</h2>
+            <div class="video-container">
+                <iframe [src]="getTrailerUrl()!" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+        }
+
+        <!-- Reviews Section -->
+        <div class="detail-section">
+            <h2 class="section-title">Opiniones de la Comunidad</h2>
             <app-review-form [mediaId]="mediaId"
                 [mediaType]="mediaType === 'movie' ? 'Movie' : mediaType === 'tv' ? 'TvShow' : 'Person'"
                 (reviewSubmitted)="onReviewSubmitted($event)"></app-review-form>
-
             <app-review-list [reviews]="reviews"></app-review-list>
         </div>
+
     </div>
     }
 </div>
