@@ -1,0 +1,98 @@
+<div class="peliculas-container min-h-screen text-white pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title"><span class="gradient-text">Famosos</span></h1>
+      <p class="hero-subtitle">Descubre y valora a tus actores, directores y celebridades favoritas</p>
+    </div>
+  </section>
+
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <span class="search-icon">🔍</span>
+      <input id="person-search" class="search-input" type="text" placeholder="Buscar famoso..."
+        [value]="searchQuery" (input)="onSearchInput($event)" autocomplete="off" />
+      @if (searchQuery) {
+        <button class="search-clear" (click)="clearSearch()" aria-label="Limpiar búsqueda">✕</button>
+      }
+    </div>
+    <div class="genre-select-wrapper">
+      <select id="dept-select" class="genre-select" [value]="selectedDeptKey" (change)="onDeptChange($event)">
+        @for (dept of departments; track dept.name) {
+          <option [value]="dept.name">{{ dept.emoji }} {{ dept.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (activeView === 'all') {
+    @if (loading) {
+      <div class="loading"><div class="spinner"></div><p>Cargando celebridades...</p></div>
+    } @else if (loadError) {
+      <div class="loading">
+        <p style="font-size: 2rem;">⚠️</p>
+        <p>No se pudo conectar con el servidor.</p>
+        <button style="margin-top:1rem;padding:0.5rem 1.5rem;border-radius:8px;background:#7c3aed;color:#fff;border:none;cursor:pointer;" (click)="loadAll()">🔄 Reintentar</button>
+      </div>
+    } @else {
+      <section class="content-section">
+        <h2 class="section-title">⭐ Celebridades Populares</h2>
+        <div class="media-grid">
+          @for (person of filteredPersons; track person.id) {
+            <a [routerLink]="['/person', person.id]" class="media-card person-card">
+              <div class="card-image">
+                <img [src]="getImageUrl(person.profilePath)" [alt]="person.name" loading="lazy" />
+                <div class="card-overlay">
+                  <div class="rating-badge" [style.borderColor]="getRatingColor(getRating(person.id))">
+                    <span class="rating-pct" [style.color]="getRatingColor(getRating(person.id))">{{ getRating(person.id) }}%</span>
+                    <span class="rating-label">usuarios</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card-content">
+                <h3>{{ person.name }}</h3>
+                <p class="known-for">{{ person.knownForDepartment || 'Actor' }}</p>
+              </div>
+            </a>
+          }
+          @if (filteredPersons.length === 0) {
+            <p class="empty-msg">No se encontraron celebridades en esta categoría.</p>
+          }
+        </div>
+      </section>
+    }
+  }
+
+  @if (activeView === 'search') {
+    @if (searchLoading) {
+      <div class="loading"><div class="spinner"></div><p>Buscando celebridades...</p></div>
+    } @else {
+      <section class="content-section genre-section">
+        @if (searchQuery.length > 1) {
+          <h2 class="section-title">🔍 Resultados para "{{ searchQuery }}"</h2>
+        }
+        <div class="media-grid">
+          @for (person of searchPersonsList; track person.id) {
+            <a [routerLink]="['/person', person.id]" class="media-card person-card">
+              <div class="card-image">
+                <img [src]="getImageUrl(person.profilePath)" [alt]="person.name" loading="lazy" />
+                <div class="card-overlay">
+                  <div class="rating-badge" [style.borderColor]="getRatingColor(getRating(person.id))">
+                    <span class="rating-pct" [style.color]="getRatingColor(getRating(person.id))">{{ getRating(person.id) }}%</span>
+                    <span class="rating-label">usuarios</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card-content">
+                <h3>{{ person.name }}</h3>
+                <p class="known-for">{{ person.knownForDepartment || 'Actor' }}</p>
+              </div>
+            </a>
+          }
+          @if (searchPersonsList.length === 0 && !searchLoading) {
+            <p class="empty-msg">No se encontraron celebridades para tu búsqueda.</p>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>
