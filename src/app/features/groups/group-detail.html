@@ -1,0 +1,401 @@
+<div class="min-h-screen bg-gray-900 text-white">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Loading -->
+    @if (loading) {
+      <div class="text-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
+        <p class="text-gray-400 mt-4">Cargando grupo...</p>
+      </div>
+    }
+
+    @if (error) {
+      <div class="text-center py-20">
+        <div class="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded-lg inline-block">{{error}}</div>
+      </div>
+    }
+
+    @if (!loading && group) {
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-4">
+          <a routerLink="/groups" class="text-gray-400 hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </a>
+          <div>
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-pink-500 flex items-center justify-center text-white font-bold text-xl">
+                {{group.name[0] | uppercase}}
+              </div>
+              <div>
+                <h1 class="text-2xl font-bold">{{group.name}}</h1>
+                <p class="text-sm text-gray-400">{{group.memberCount}} miembro(s) · Creado por {{group.createdByName}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          @if (myRole === 'Admin') {
+            <button (click)="showInviteModal = true"
+              class="px-3 py-1.5 rounded-lg border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white transition-colors text-sm">
+              Invitar
+            </button>
+          }
+          <button (click)="leaveGroup()"
+            class="px-3 py-1.5 rounded-lg border border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-colors text-sm">
+            Abandonar
+          </button>
+        </div>
+      </div>
+
+      @if (group.description) {
+        <p class="text-gray-400 mb-6">{{group.description}}</p>
+      }
+
+      <!-- Tabs -->
+      <div class="flex gap-1 mb-6 border-b border-gray-700">
+        <button (click)="activeTab = 'chat'"
+          class="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px"
+          [class.text-purple-400]="activeTab === 'chat'"
+          [class.border-purple-500]="activeTab === 'chat'"
+          [class.text-gray-400]="activeTab !== 'chat'"
+          [class.border-transparent]="activeTab !== 'chat'"
+          [class.hover:text-white]="activeTab !== 'chat'">
+          Chat
+        </button>
+        <button (click)="activeTab = 'ratings'"
+          class="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px"
+          [class.text-purple-400]="activeTab === 'ratings'"
+          [class.border-purple-500]="activeTab === 'ratings'"
+          [class.text-gray-400]="activeTab !== 'ratings'"
+          [class.border-transparent]="activeTab !== 'ratings'"
+          [class.hover:text-white]="activeTab !== 'ratings'">
+          Valoraciones
+        </button>
+        <button (click)="activeTab = 'members'"
+          class="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px"
+          [class.text-purple-400]="activeTab === 'members'"
+          [class.border-purple-500]="activeTab === 'members'"
+          [class.text-gray-400]="activeTab !== 'members'"
+          [class.border-transparent]="activeTab !== 'members'"
+          [class.hover:text-white]="activeTab !== 'members'">
+          Miembros
+        </button>
+      </div>
+
+      <!-- Tab: Chat -->
+      @if (activeTab === 'chat') {
+        <div class="bg-gray-800 rounded-xl border border-gray-700 flex flex-col h-[500px]">
+          <div #chatMessages class="flex-1 overflow-y-auto p-4 space-y-3">
+            @if (chatLoading) {
+              <div class="text-center py-10">
+                <div class="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full mx-auto"></div>
+              </div>
+            }
+            @if (!chatLoading && messages.length === 0) {
+              <div class="text-center py-10 text-gray-500">
+                <p>No hay mensajes aún. ¡Sé el primero en escribir!</p>
+              </div>
+            }
+            @for (msg of messages; track msg.id) {
+              <div class="flex items-start gap-3" [class.flex-row-reverse]="isCurrentUser(msg.userId)">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                  {{msg.userName[0] | uppercase}}
+                </div>
+                <div class="max-w-[70%]" [class.items-end]="isCurrentUser(msg.userId)">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs font-semibold text-gray-400">{{msg.userName}}</span>
+                    <span class="text-xs text-gray-600">{{formatDate(msg.sentAt)}}</span>
+                  </div>
+                  <div class="rounded-2xl px-4 py-2 text-sm"
+                    [class.bg-purple-600]="isCurrentUser(msg.userId)"
+                    [class.bg-gray-700]="!isCurrentUser(msg.userId)">
+                    {{msg.message}}
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="border-t border-gray-700 p-3">
+            <div class="flex gap-2">
+              <input type="text" [(ngModel)]="newMessage" (keydown.enter)="sendMessage()" placeholder="Escribe un mensaje..."
+                class="flex-1 bg-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-500 text-sm">
+              <button (click)="sendMessage()" [disabled]="!newMessage.trim()"
+                class="px-4 py-2.5 rounded-lg bg-gradient-to-r from-amber-500 to-pink-500 text-white font-semibold text-sm hover:from-amber-600 hover:to-pink-600 transition-colors disabled:opacity-50">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 0l-7 7m7-7l7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Tab: Ratings -->
+      @if (activeTab === 'ratings') {
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Valoraciones del grupo</h2>
+            <button (click)="openRatingModal()"
+              class="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-pink-500 text-white text-sm font-semibold hover:from-amber-600 hover:to-pink-600 transition-colors">
+              + Valorar
+            </button>
+          </div>
+
+          @if (ratingsLoading) {
+            <div class="text-center py-10">
+              <div class="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full mx-auto"></div>
+            </div>
+          }
+
+          @if (!ratingsLoading && ratings.length === 0) {
+            <div class="text-center py-10 text-gray-500 bg-gray-800 rounded-xl border border-gray-700">
+              <p>No hay valoraciones aún. ¡Valora una película o serie!</p>
+            </div>
+          }
+
+          @if (!ratingsLoading) {
+            <div class="grid gap-4">
+              @for (rating of ratings; track rating.id) {
+                <div class="bg-gray-800 rounded-xl border border-gray-700 p-4">
+                  <div class="flex items-start gap-3">
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between mb-2">
+                        <div>
+                          <span class="font-semibold">{{rating.mediaTitle}}</span>
+                          <span class="text-xs text-gray-500 ml-2">{{rating.mediaType === 'Movie' ? 'Película' : 'Serie'}}</span>
+                        </div>
+                        <div class="flex gap-0.5">
+                          @for (star of starsArray(rating.rating); track $index) {
+                            <svg class="w-4 h-4" [class.text-amber-400]="star === 1" [class.text-gray-600]="star === 0" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                          }
+                        </div>
+                      </div>
+                      @if (rating.comment) {
+                        <p class="text-sm text-gray-400">{{rating.comment}}</p>
+                      }
+                      <div class="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                        <span>{{rating.userName}}</span>
+                        <span>·</span>
+                        <span>{{formatDate(rating.createdAt)}}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Tab: Members -->
+      @if (activeTab === 'members') {
+        <div>
+          <h2 class="text-lg font-semibold mb-4">Miembros ({{group.members.length}})</h2>
+          <div class="space-y-2">
+            @for (member of group.members; track member.userId) {
+              <div class="bg-gray-800 rounded-xl border border-gray-700 p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                    {{member.userName[0] | uppercase}}
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-semibold">{{member.userName}}</span>
+                      @if (member.role === 'Admin') {
+                        <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 text-xs font-semibold">Admin</span>
+                      }
+                      @if (isCurrentUser(member.userId)) {
+                        <span class="text-xs text-gray-500">(tú)</span>
+                      }
+                    </div>
+                    <span class="text-xs text-gray-500">Miembro desde {{formatDate(member.joinedAt)}}</span>
+                  </div>
+                </div>
+                @if (myRole === 'Admin' && !isCurrentUser(member.userId)) {
+                  <div class="flex gap-2">
+                    @if (member.role !== 'Admin') {
+                      <button (click)="promoteMember(member.userId)"
+                        class="text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-400 hover:bg-purple-500 hover:text-white transition-colors">
+                        Hacer Admin
+                      </button>
+                    }
+                    <button (click)="removeMember(member.userId)"
+                      class="text-xs px-2 py-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors">
+                      Eliminar
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Invite Modal -->
+  @if (showInviteModal) {
+    <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" (click)="showInviteModal = false">
+      <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-md border border-gray-700" (click)="$event.stopPropagation()">
+        <h2 class="text-xl font-bold text-white mb-4">Invitar miembros</h2>
+        <p class="text-gray-400 text-sm mb-4">Comparte este código con tus amigos para que se unan al grupo:</p>
+        <div class="bg-gray-900 rounded-lg p-4 text-center mb-4">
+          <span class="text-3xl font-bold tracking-widest text-purple-400">{{inviteCode || 'Sin código'}}</span>
+        </div>
+        <div class="flex gap-3">
+          @if (!inviteCode) {
+            <button (click)="generateInvite()"
+              class="flex-1 px-4 py-2 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors">
+              Generar código
+            </button>
+          }
+          @if (inviteCode) {
+            <button (click)="copyInviteCode()"
+              class="flex-1 px-4 py-2 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors">
+              {{copied ? '¡Copiado!' : 'Copiar código'}}
+            </button>
+          }
+          @if (inviteCode) {
+            <button (click)="generateInvite()"
+              class="px-4 py-2 rounded-lg border border-gray-600 text-gray-400 hover:text-white hover:border-gray-500 transition-colors">
+              Regenerar
+            </button>
+          }
+        </div>
+        <button (click)="showInviteModal = false"
+          class="mt-4 w-full px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Rating Modal -->
+  @if (showRatingModal) {
+    <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" (click)="showRatingModal = false">
+      <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-md border border-gray-700" (click)="$event.stopPropagation()">
+        <h2 class="text-xl font-bold text-white mb-4">Valorar película/serie</h2>
+        @if (ratingError) {
+          <div class="bg-red-500/20 border border-red-500 text-red-300 px-3 py-2 rounded-lg mb-4 text-sm">{{ratingError}}</div>
+        }
+        <div class="space-y-4">
+          <!-- Búsqueda TMDB -->
+          @if (!ratingDto.mediaId) {
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <input type="text" [(ngModel)]="searchQuery" (input)="onSearchInput($event)" placeholder="Buscar película, serie o famoso..."
+                class="w-full bg-gray-700 text-white rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-500">
+              @if (searchQuery) {
+                <button (click)="clearSearch()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+              }
+            </div>
+
+            <!-- Resultados -->
+            @if (searchQuery) {
+              <div class="max-h-60 overflow-y-auto bg-gray-900 rounded-lg border border-gray-700 p-2 space-y-2 mt-2 custom-scrollbar">
+                @if (searchLoading) {
+                  <div class="text-center py-4 text-purple-400 text-sm">Buscando...</div>
+                }
+                @if (!searchLoading && searchResultMovies.length === 0 && searchResultShows.length === 0 && searchResultPersons.length === 0) {
+                  <div class="text-center py-4 text-gray-400 text-sm">No se encontraron resultados</div>
+                }
+                
+                @for (movie of searchResultMovies; track movie.id) {
+                  <div (click)="selectMedia(movie, 'Movie')" class="flex items-center gap-3 p-2 hover:bg-gray-800 rounded-lg cursor-pointer transition-colors">
+                    <img [src]="getImageUrl(movie.posterPath, 'w92')" class="w-10 h-14 object-cover rounded shadow">
+                    <div>
+                      <p class="font-semibold text-sm text-white">{{movie.title}}</p>
+                      <p class="text-xs text-gray-400">Película · {{movie.releaseDate | date:'yyyy'}}</p>
+                    </div>
+                  </div>
+                }
+                @for (show of searchResultShows; track show.id) {
+                  <div (click)="selectMedia(show, 'TvShow')" class="flex items-center gap-3 p-2 hover:bg-gray-800 rounded-lg cursor-pointer transition-colors">
+                    <img [src]="getImageUrl(show.posterPath, 'w92')" class="w-10 h-14 object-cover rounded shadow">
+                    <div>
+                      <p class="font-semibold text-sm text-white">{{show.name}}</p>
+                      <p class="text-xs text-gray-400">Serie · {{show.firstAirDate | date:'yyyy'}}</p>
+                    </div>
+                  </div>
+                }
+                @for (person of searchResultPersons; track person.id) {
+                  <div (click)="selectMedia(person, 'Person')" class="flex items-center gap-3 p-2 hover:bg-gray-800 rounded-lg cursor-pointer transition-colors">
+                    <img [src]="getImageUrl(person.profilePath, 'w92')" class="w-10 h-14 object-cover rounded shadow">
+                    <div>
+                      <p class="font-semibold text-sm text-white">{{person.name}}</p>
+                      <p class="text-xs text-gray-400">Famoso/a</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          }
+
+          <!-- Selección -->
+          @if (ratingDto.mediaId) {
+            <div class="flex items-center justify-between bg-gray-900 rounded-lg p-3 border border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+              <div class="flex items-center gap-3">
+                <img [src]="getImageUrl(ratingDto.posterPath, 'w92')" class="w-10 h-14 object-cover rounded shadow-lg">
+                <div>
+                  <p class="font-bold text-sm text-white">{{ratingDto.mediaTitle}}</p>
+                  <p class="text-xs text-purple-400 font-medium mt-0.5">
+                    {{ratingDto.mediaType === 'Movie' ? 'Película' : ratingDto.mediaType === 'TvShow' ? 'Serie' : 'Famoso/a'}}
+                  </p>
+                </div>
+              </div>
+              <button (click)="clearSelection()" class="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+          }
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Puntuación</label>
+            <div class="flex gap-2">
+              @for (star of [1,2,3,4,5]; track star) {
+                <button (click)="ratingDto.rating = star"
+                  class="w-10 h-10 rounded-lg transition-colors"
+                  [class.bg-amber-500]="star <= ratingDto.rating"
+                  [class.bg-gray-700]="star > ratingDto.rating">
+                  <svg class="w-5 h-5 mx-auto text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                </button>
+              }
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Comentario (opcional)</label>
+            <textarea [(ngModel)]="ratingDto.comment" placeholder="¿Qué te ha parecido?"
+              class="w-full bg-gray-700 text-white rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-500 resize-none h-20"></textarea>
+          </div>
+          <div class="flex gap-3 justify-end pt-2">
+            <button (click)="showRatingModal = false"
+              class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
+              Cancelar
+            </button>
+            <button (click)="submitRating()" [disabled]="submittingRating"
+              class="px-6 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-pink-500 text-white font-semibold hover:from-amber-600 hover:to-pink-600 transition-colors disabled:opacity-50">
+              @if (submittingRating) {
+                <span class="flex items-center gap-2">
+                  <span class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+                  Enviando...
+                </span>
+              } @else { Valorar }
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

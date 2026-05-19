@@ -1,0 +1,179 @@
+<div class="min-h-screen bg-gray-900 text-white">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold logo-gradient">Grupos</h1>
+        <p class="text-gray-400 mt-1">Crea grupos con amigos para valorar películas y series</p>
+      </div>
+      <div class="flex gap-3">
+        <button (click)="openJoinModal()"
+          class="px-4 py-2 rounded-lg border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white transition-colors text-sm font-semibold">
+          Unirse a grupo
+        </button>
+        <button (click)="openCreateModal()"
+          class="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-pink-500 hover:from-amber-600 hover:to-pink-600 transition-colors text-white text-sm font-semibold">
+          + Crear grupo
+        </button>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="mb-6">
+      <div class="relative max-w-md">
+        <input type="text" [(ngModel)]="searchQuery" (input)="searchGroups()" placeholder="Buscar grupos públicos..."
+          class="w-full bg-gray-800 text-gray-300 rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-500">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+      @if (searchResults.length > 0) {
+        <div class="mt-2 bg-gray-800 rounded-lg border border-gray-700 max-w-md">
+          @for (g of searchResults; track g.id) {
+            <div class="p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-0">
+              <div class="font-semibold">{{g.name}}</div>
+              <div class="text-sm text-gray-400">{{g.memberCount}} miembro(s) · Creado por {{g.createdByName}}</div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Loading -->
+    @if (loading) {
+      <div class="text-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
+        <p class="text-gray-400 mt-4">Cargando grupos...</p>
+      </div>
+    }
+
+    @if (error) {
+      <div class="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded-lg">{{error}}</div>
+    }
+
+    <!-- Groups Grid -->
+    @if (!loading && groups.length === 0) {
+      <div class="text-center py-20">
+        <svg class="w-20 h-20 mx-auto text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <h3 class="text-xl font-semibold text-gray-400 mb-2">No tienes grupos</h3>
+        <p class="text-gray-500 mb-4">Crea un grupo o únete a uno existente para empezar</p>
+        <button (click)="openCreateModal()" class="px-6 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-pink-500 text-white font-semibold">
+          Crear mi primer grupo
+        </button>
+      </div>
+    }
+
+    @if (!loading && groups.length > 0) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (group of groups; track group.id) {
+          <a [routerLink]="['/groups', group.id]"
+            class="block bg-gray-800 rounded-xl border border-gray-700 hover:border-purple-500 transition-all hover:shadow-lg hover:shadow-purple-500/10 p-6 group">
+            <div class="flex items-start justify-between mb-3">
+              <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-amber-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
+                {{group.name[0] | uppercase}}
+              </div>
+              @if (group.createdByName === authService.currentUser()?.username) {
+                <button (click)="deleteGroup(group.id, $event)"
+                  class="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              }
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-1">{{group.name}}</h3>
+            @if (group.description) {
+              <p class="text-sm text-gray-400 mb-3 line-clamp-2">{{group.description}}</p>
+            }
+            <div class="flex items-center gap-4 text-sm text-gray-500">
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/>
+                </svg>
+                {{group.memberCount}}
+              </span>
+              <span>Creado por {{group.createdByName}}</span>
+            </div>
+          </a>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Create Modal -->
+  @if (showCreateModal) {
+    <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" (click)="showCreateModal = false">
+      <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-md border border-gray-700" (click)="$event.stopPropagation()">
+        <h2 class="text-xl font-bold text-white mb-4">Crear grupo</h2>
+        @if (createError) {
+          <div class="bg-red-500/20 border border-red-500 text-red-300 px-3 py-2 rounded-lg mb-4 text-sm">{{createError}}</div>
+        }
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Nombre del grupo</label>
+            <input type="text" [(ngModel)]="createDto.name" placeholder="Ej: Cinefilos UNED"
+              class="w-full bg-gray-700 text-white rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Descripción (opcional)</label>
+            <textarea [(ngModel)]="createDto.description" placeholder="¿De qué va vuestro grupo?"
+              class="w-full bg-gray-700 text-white rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-500 resize-none h-24"></textarea>
+          </div>
+          <div class="flex gap-3 justify-end pt-2">
+            <button (click)="showCreateModal = false"
+              class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
+              Cancelar
+            </button>
+            <button (click)="createGroup()" [disabled]="creating"
+              class="px-6 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-pink-500 text-white font-semibold hover:from-amber-600 hover:to-pink-600 transition-colors disabled:opacity-50">
+              @if (creating) {
+                <span class="flex items-center gap-2">
+                  <span class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+                  Creando...
+                </span>
+              } @else { Crear grupo }
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Join Modal -->
+  @if (showJoinModal) {
+    <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" (click)="showJoinModal = false">
+      <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-md border border-gray-700" (click)="$event.stopPropagation()">
+        <h2 class="text-xl font-bold text-white mb-4">Unirse a un grupo</h2>
+        @if (joinSuccess) {
+          <div class="bg-green-500/20 border border-green-500 text-green-300 px-3 py-2 rounded-lg mb-4 text-sm">{{joinSuccess}}</div>
+        }
+        @if (joinError) {
+          <div class="bg-red-500/20 border border-red-500 text-red-300 px-3 py-2 rounded-lg mb-4 text-sm">{{joinError}}</div>
+        }
+        <p class="text-gray-400 text-sm mb-4">Pídele el código de invitación al administrador del grupo.</p>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Código de invitación</label>
+          <input type="text" [(ngModel)]="inviteCode" placeholder="Ej: A1B2C3D4"
+            class="w-full bg-gray-700 text-white rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder-gray-500 uppercase">
+        </div>
+        <div class="flex gap-3 justify-end pt-4">
+          <button (click)="showJoinModal = false"
+            class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
+            Cancelar
+          </button>
+          <button (click)="joinGroup()" [disabled]="joining || !inviteCode.trim()"
+            class="px-6 py-2 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50">
+            @if (joining) {
+              <span class="flex items-center gap-2">
+                <span class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+                Uniendo...
+              </span>
+            } @else { Unirse }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

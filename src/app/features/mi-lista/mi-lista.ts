@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -12,38 +12,45 @@ import { Review } from '../../core/models/media.model';
   templateUrl: './mi-lista.html',
   styleUrl: './mi-lista.css',
 })
-export class MiListaComponent implements OnInit {
+export class MiListaComponent {
   reviews: Review[] = [];
   loading = true;
   error = false;
 
   constructor(
     public authService: AuthService,
-    private reviewService: ReviewService
-  ) {}
-
-  ngOnInit() {
-    this.loadReviews();
+    private reviewService: ReviewService,
+    private cdr: ChangeDetectorRef
+  ) {
+    // Cargar y actualizar las valoraciones de forma reactiva cuando el usuario cambie (por ejemplo, tras el login de Google)
+    effect(() => {
+      this.loadReviews();
+    });
   }
 
   loadReviews() {
     const username = this.authService.currentUser()?.username;
     if (username) {
       this.loading = true;
+      this.cdr.markForCheck();
       this.reviewService.getReviewsByUser(username).subscribe({
         next: (reviews) => {
           this.reviews = reviews.sort(
             (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
           this.loading = false;
+          this.cdr.markForCheck();
         },
         error: () => {
           this.error = true;
           this.loading = false;
+          this.cdr.markForCheck();
         }
       });
     } else {
+      this.reviews = [];
       this.loading = false;
+      this.cdr.markForCheck();
     }
   }
 
