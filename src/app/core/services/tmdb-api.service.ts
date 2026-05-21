@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
+import { Observable, forkJoin, of } from 'rxjs';
+import { shareReplay, switchMap, map, catchError } from 'rxjs/operators';
 import { Movie, TvShow, Person } from '../models/media.model';
 import { environment } from '../../../environments/environment';
 
@@ -94,5 +94,45 @@ export class TmdbApiService {
         if (!path) return '';
         if (path.startsWith('http')) return path;
         return `https://image.tmdb.org/t/p/${size}${path}`;
+    }
+
+    // App Top Rated
+    getAppTopRatedMedia(mediaType: string, page: number = 1, pageSize: number = 20): Observable<any[]> {
+        const params = new HttpParams()
+            .set('page', page.toString())
+            .set('pageSize', pageSize.toString());
+        return this.http.get<any[]>(`${this.apiUrl}/reviews/top-rated/${mediaType}`, { params });
+    }
+
+    getHydratedAppTopRatedMedia(mediaType: string, page: number = 1, pageSize: number = 20): Observable<any[]> {
+        return this.getAppTopRatedMedia(mediaType, page, pageSize).pipe(
+            switchMap(topRated => {
+                if (!topRated || topRated.length === 0) return of([]);
+                
+                const requests = topRated.map(item => {
+                    let detailReq: Observable<any>;
+                    if (mediaType === 'movie') detailReq = this.getMovieDetails(item.mediaId);
+                    else if (mediaType === 'tv') detailReq = this.getTvShowDetails(item.mediaId);
+                    else if (mediaType === 'person') detailReq = this.getPersonDetails(item.mediaId);
+                    else detailReq = of(item);
+
+                    return detailReq.pipe(
+                        map((detail: any) => ({
+                            ...(detail as object),
+                            mediaType: mediaType,
+                            appAverage: item.average,
+                            appPercentage: item.percentage,
+                            appTotalReviews: item.totalReviews,
+                            voteAverage: item.average
+                        })),
+                        catchError(() => of(null))
+                    );
+                });
+
+                return forkJoin(requests).pipe(
+                    map(results => results.filter(r => r !== null))
+                );
+            })
+        );
     }
 }

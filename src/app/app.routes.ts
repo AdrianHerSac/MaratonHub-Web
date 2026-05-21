@@ -13,6 +13,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { GroupsComponent } from './features/groups/groups';
 import { GroupDetailComponent } from './features/groups/group-detail';
 import { PersonsComponent } from './features/persons/persons';
+import { TopRatedComponent } from './features/top-rated/top-rated';
 
 export const routes: Routes = [
     {
@@ -46,6 +47,10 @@ export const routes: Routes = [
     {
         path: 'person/:id',
         component: MediaDetailComponent
+    },
+    {
+        path: 'top-rated',
+        component: TopRatedComponent
     },
     {
         path: 'groups',

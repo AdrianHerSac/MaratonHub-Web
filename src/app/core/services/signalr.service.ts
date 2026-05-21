@@ -1,6 +1,6 @@
 import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import { ChatMessage, NotificationModel } from '../models/group.model';
@@ -11,7 +11,7 @@ export class SignalRService implements OnDestroy {
   private messageSubject = new Subject<ChatMessage>();
   private notificationSubject = new Subject<NotificationModel>();
   private unreadCountSubject = new Subject<number>();
-  private connectedSubject = new Subject<boolean>();
+  private connectedSubject = new BehaviorSubject<boolean>(false);
 
   public onMessage = this.messageSubject.asObservable();
   public onNotification = this.notificationSubject.asObservable();
@@ -21,7 +21,10 @@ export class SignalRService implements OnDestroy {
   constructor(private authService: AuthService, private zone: NgZone) {}
 
   start(): void {
-    if (this.hubConnection?.state === signalR.HubConnectionState.Connected) return;
+    if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
+      this.connectedSubject.next(true);
+      return;
+    }
 
     const token = this.authService.getToken();
     if (!token) return;

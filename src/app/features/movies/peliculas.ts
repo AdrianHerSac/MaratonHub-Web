@@ -7,7 +7,6 @@ import { forkJoin, Subject, TimeoutError } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, switchMap, timeout } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { RouterModule } from '@angular/router';
-import { MovieCarousel } from '../../shared/components/movie-carousel/movie-carousel';
 import { Subscription } from 'rxjs';
 
 export interface Genre {

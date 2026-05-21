@@ -1,9 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TmdbApiService } from '../../core/services/tmdb-api.service';
-import { Movie, TvShow } from '../../core/models/media.model';
 import { RouterModule } from '@angular/router';
-import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-top-rated',
@@ -15,51 +13,97 @@ import { forkJoin } from 'rxjs';
 export class TopRatedComponent implements OnInit {
   private tmdbService = inject(TmdbApiService);
 
-  allMedia: any[] = [];
-  displayedMedia: any[] = [];
+  movies: any[] = [];
+  series: any[] = [];
+  persons: any[] = [];
 
-  pageSize = 40;
-  currentPage = 1;
-  isLoading = signal(false);
+  pageSize = 20;
+  
+  moviesPage = 1;
+  seriesPage = 1;
+  personsPage = 1;
+
+  isLoadingMovies = signal(false);
+  isLoadingSeries = signal(false);
+  isLoadingPersons = signal(false);
+
+  hasMoreMovies = true;
+  hasMoreSeries = true;
+  hasMorePersons = true;
 
   ngOnInit() {
-    this.loadTopRated();
+    this.loadMovies();
+    this.loadSeries();
+    this.loadPersons();
   }
 
-  loadTopRated() {
-    this.isLoading.set(true);
+  loadMovies() {
+    if (!this.hasMoreMovies) return;
+    this.isLoadingMovies.set(true);
     
-    // Fetch 2 pages of movies and 2 pages of series from local MongoDB
-    forkJoin({
-      m1: this.tmdbService.getTopRatedMovies(1),
-      m2: this.tmdbService.getTopRatedMovies(2),
-      s1: this.tmdbService.getTopRatedTvShows(1),
-      s2: this.tmdbService.getTopRatedTvShows(2)
-    }).subscribe({
-      next: (data) => {
-        const allMovies = [...data.m1, ...data.m2].map(m => ({ ...m, mediaType: 'movie' }));
-        const allSeries = [...data.s1, ...data.s2].map(s => ({ ...s, mediaType: 'tv' }));
-        
-        // Películas primero, luego series
-        this.allMedia = [...allMovies, ...allSeries];
-        this.updateDisplayedMedia();
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Error loading top rated:', err);
-        this.isLoading.set(false);
-      }
-    });
+    this.tmdbService.getHydratedAppTopRatedMedia('movie', this.moviesPage, this.pageSize)
+      .subscribe({
+        next: (data) => {
+          this.movies = [...this.movies, ...data];
+          if (data.length < this.pageSize) this.hasMoreMovies = false;
+          this.isLoadingMovies.set(false);
+        },
+        error: (err) => {
+          console.error('Error loading top rated movies:', err);
+          this.isLoadingMovies.set(false);
+        }
+      });
   }
 
-  updateDisplayedMedia() {
-    const end = this.currentPage * this.pageSize;
-    this.displayedMedia = this.allMedia.slice(0, end);
+  loadSeries() {
+    if (!this.hasMoreSeries) return;
+    this.isLoadingSeries.set(true);
+    
+    this.tmdbService.getHydratedAppTopRatedMedia('tv', this.seriesPage, this.pageSize)
+      .subscribe({
+        next: (data) => {
+          this.series = [...this.series, ...data];
+          if (data.length < this.pageSize) this.hasMoreSeries = false;
+          this.isLoadingSeries.set(false);
+        },
+        error: (err) => {
+          console.error('Error loading top rated series:', err);
+          this.isLoadingSeries.set(false);
+        }
+      });
   }
 
-  loadMore() {
-    this.currentPage++;
-    this.updateDisplayedMedia();
+  loadPersons() {
+    if (!this.hasMorePersons) return;
+    this.isLoadingPersons.set(true);
+    
+    this.tmdbService.getHydratedAppTopRatedMedia('person', this.personsPage, this.pageSize)
+      .subscribe({
+        next: (data) => {
+          this.persons = [...this.persons, ...data];
+          if (data.length < this.pageSize) this.hasMorePersons = false;
+          this.isLoadingPersons.set(false);
+        },
+        error: (err) => {
+          console.error('Error loading top rated persons:', err);
+          this.isLoadingPersons.set(false);
+        }
+      });
+  }
+
+  loadMoreMovies() {
+    this.moviesPage++;
+    this.loadMovies();
+  }
+
+  loadMoreSeries() {
+    this.seriesPage++;
+    this.loadSeries();
+  }
+
+  loadMorePersons() {
+    this.personsPage++;
+    this.loadPersons();
   }
 
   getImageUrl(path: string) {

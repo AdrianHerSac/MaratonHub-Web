@@ -38,6 +38,7 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
   newMessage = '';
   chatLoading = true;
   private messageSub?: Subscription;
+  private connectedSub?: Subscription;
 
   // Search for Rating
   searchQuery = '';
@@ -112,6 +113,7 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.messageSub?.unsubscribe();
+    this.connectedSub?.unsubscribe();
     this.searchSub?.unsubscribe();
     if (this.group?.id) {
       this.signalR.leaveGroup(this.group.id);
@@ -142,7 +144,12 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
 
   private connectToChat(groupId: string): void {
     this.signalR.start();
-    this.signalR.joinGroup(groupId);
+    
+    this.connectedSub = this.signalR.onConnected.subscribe(connected => {
+      if (connected) {
+        this.signalR.joinGroup(groupId);
+      }
+    });
 
     this.messageSub = this.signalR.onMessage.subscribe(msg => {
       if (msg.groupId === groupId) {
@@ -188,6 +195,7 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
     if (!this.newMessage.trim() || !this.group?.id) return;
     this.signalR.sendMessage(this.group.id, this.newMessage.trim());
     this.newMessage = '';
+    this.cdr.detectChanges();
   }
 
   private scrollChat(): void {
