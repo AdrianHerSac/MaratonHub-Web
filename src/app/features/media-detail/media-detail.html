@@ -133,7 +133,9 @@
                             <span class="season-meta">
                                 {{ season.episodeCount }} episodios &bull; {{ season.airDate | date: 'yyyy' }}
                                 @if (season.appRating && season.appRating.TotalReviews > 0) {
-                                    <span style="color: #ffd700;">&bull; MH: ⭐ {{ season.appRating.Average }} ({{ season.appRating.TotalReviews }} votos)</span>
+                                    <span style="color: #ffd700;">&bull; ⭐ {{ season.appRating.Average }} ({{ season.appRating.TotalReviews }} votos)</span>
+                                } @else {
+                                    <span>&bull; Sin valoraciones</span>
                                 }
                             </span>
                         </div>
@@ -162,9 +164,11 @@
                                         </div>
                                         <p class="episode-overview">{{ episode.overview || 'Sin descripción' }}</p>
                                         <span class="episode-meta">
-                                            {{ episode.airDate | date: 'mediumDate' }} &bull; TMDB: ⭐ {{ episode.voteAverage.toFixed(1) }}
+                                            {{ episode.airDate | date: 'mediumDate' }}
                                             @if (episode.appRating && episode.appRating.TotalReviews > 0) {
-                                                <span style="color: #ffd700;">&bull; MH: ⭐ {{ episode.appRating.Average }} ({{ episode.appRating.TotalReviews }} votos)</span>
+                                                <span style="color: #ffd700;">&bull; ⭐ {{ episode.appRating.Average }} ({{ episode.appRating.TotalReviews }} votos)</span>
+                                            } @else {
+                                                <span>&bull; Sin valoraciones</span>
                                             }
                                         </span>
                                         @if (episode.showReviewForm) {
