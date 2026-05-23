@@ -96,7 +96,7 @@
           Actividad Reciente
         </h2>
         <div class="space-y-4">
-          <div *ngFor="let user of stats.recentUsers; let i = index" class="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-800/30 transition-colors border border-transparent hover:border-gray-700">
+          <div *ngFor="let user of stats?.recentUsers; let i = index" class="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-800/30 transition-colors border border-transparent hover:border-gray-700">
             <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 font-bold">
               {{ i + 1 }}
             </div>
