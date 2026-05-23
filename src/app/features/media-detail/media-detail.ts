@@ -62,6 +62,19 @@ export class MediaDetailComponent implements OnInit {
         next: (data) => {
           this.media = data;
           this.loading = false;
+          
+          if (this.media.seasons && this.media.seasons.length > 0) {
+            const items = this.media.seasons.map(s => ({ mediaId: s.id, mediaType: 'Season' }));
+            this.reviewService.getBatchAverages(items).subscribe({
+              next: (avgs) => {
+                (this.media as TvShow).seasons!.forEach(s => {
+                  s.appRating = avgs[`Season_${s.id}`];
+                });
+                this.cdr.markForCheck();
+              }
+            });
+          }
+
           this.cdr.markForCheck();
         },
         error: (err) => {
@@ -168,6 +181,18 @@ export class MediaDetailComponent implements OnInit {
         next: (data) => {
           season.episodes = data.episodes;
           season.loading = false;
+          // Fetch episode ratings
+          if (season.episodes && season.episodes.length > 0) {
+            const items = season.episodes.map((e: any) => ({ mediaId: e.id, mediaType: 'Episode' }));
+            this.reviewService.getBatchAverages(items).subscribe({
+              next: (avgs) => {
+                season.episodes.forEach((e: any) => {
+                  e.appRating = avgs[`Episode_${e.id}`];
+                });
+                this.cdr.markForCheck();
+              }
+            });
+          }
           this.cdr.markForCheck();
         },
         error: (err) => {
@@ -177,6 +202,29 @@ export class MediaDetailComponent implements OnInit {
         }
       });
     }
+  }
+
+  toggleReviewForm(item: any) {
+    item.showReviewForm = !item.showReviewForm;
+  }
+
+  onItemReviewSubmitted(reviewData: { rating: number; comment: string }, targetId: number, mediaType: 'Season' | 'Episode', targetItem: any) {
+    this.reviewService.createReview({
+      mediaId: targetId,
+      mediaType: mediaType as any,
+      ...reviewData
+    }).subscribe({
+      next: () => {
+        targetItem.showReviewForm = false;
+        this.reviewService.getBatchAverages([{ mediaId: targetId, mediaType }]).subscribe({
+          next: (avgs) => {
+            targetItem.appRating = avgs[`${mediaType}_${targetId}`];
+            this.cdr.markForCheck();
+          }
+        });
+      },
+      error: (err) => console.error('Error creating review:', err)
+    });
   }
 
   hasTrailer(): boolean {

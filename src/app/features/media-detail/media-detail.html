@@ -130,12 +130,23 @@
                         <img [src]="getActorImageUrl(season.posterPath)" [alt]="season.name" class="season-thumb" *ngIf="season.posterPath" />
                         <div class="season-info-header">
                             <h3>{{ season.name }}</h3>
-                            <span class="season-meta">{{ season.episodeCount }} episodios &bull; {{ season.airDate | date: 'yyyy' }}</span>
+                            <span class="season-meta">
+                                {{ season.episodeCount }} episodios &bull; {{ season.airDate | date: 'yyyy' }}
+                                @if (season.appRating && season.appRating.TotalReviews > 0) {
+                                    <span style="color: #ffd700;">&bull; MH: ⭐ {{ season.appRating.Average }} ({{ season.appRating.TotalReviews }} votos)</span>
+                                }
+                            </span>
                         </div>
+                        <button class="rate-btn" (click)="toggleReviewForm(season); $event.stopPropagation()">Valorar</button>
                         <span class="toggle-icon">{{ season.expanded ? '▲' : '▼' }}</span>
                     </div>
                     @if (season.expanded) {
                     <div class="season-body">
+                        @if (season.showReviewForm) {
+                            <div class="inline-review-container">
+                                <app-review-form [mediaId]="season.id" mediaType="Season" (reviewSubmitted)="onItemReviewSubmitted($event, season.id, 'Season', season)"></app-review-form>
+                            </div>
+                        }
                         <p class="season-overview" *ngIf="season.overview">{{ season.overview }}</p>
                         @if (season.loading) {
                             <div class="spinner-small">Cargando episodios...</div>
@@ -144,10 +155,23 @@
                                 @for (episode of season.episodes; track episode.id) {
                                 <div class="episode-item">
                                     <img [src]="getActorImageUrl(episode.stillPath)" [alt]="episode.name" class="episode-still" />
-                                    <div class="episode-details">
-                                        <h4>{{ episode.episodeNumber }}. {{ episode.name }}</h4>
+                                    <div class="episode-details" style="width: 100%;">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                            <h4>{{ episode.episodeNumber }}. {{ episode.name }}</h4>
+                                            <button class="rate-btn-small" (click)="toggleReviewForm(episode)">Valorar</button>
+                                        </div>
                                         <p class="episode-overview">{{ episode.overview || 'Sin descripción' }}</p>
-                                        <span class="episode-meta">{{ episode.airDate | date: 'mediumDate' }} &bull; ⭐ {{ episode.voteAverage.toFixed(1) }}</span>
+                                        <span class="episode-meta">
+                                            {{ episode.airDate | date: 'mediumDate' }} &bull; TMDB: ⭐ {{ episode.voteAverage.toFixed(1) }}
+                                            @if (episode.appRating && episode.appRating.TotalReviews > 0) {
+                                                <span style="color: #ffd700;">&bull; MH: ⭐ {{ episode.appRating.Average }} ({{ episode.appRating.TotalReviews }} votos)</span>
+                                            }
+                                        </span>
+                                        @if (episode.showReviewForm) {
+                                            <div class="inline-review-container">
+                                                <app-review-form [mediaId]="episode.id" mediaType="Episode" (reviewSubmitted)="onItemReviewSubmitted($event, episode.id, 'Episode', episode)"></app-review-form>
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                                 }

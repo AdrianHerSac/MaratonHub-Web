@@ -43,6 +43,8 @@ export interface Season {
     episodeCount: number;
     airDate?: Date;
     episodes?: Episode[];
+    appRating?: any; // Contains Average, Percentage, TotalReviews from our app
+    showReviewForm?: boolean;
     // UI state
     expanded?: boolean;
     loading?: boolean;
@@ -56,6 +58,8 @@ export interface Episode {
     stillPath?: string;
     airDate?: Date;
     voteAverage: number;
+    appRating?: any; // Contains Average, Percentage, TotalReviews from our app
+    showReviewForm?: boolean;
 }
 
 export interface CastMember {
@@ -94,7 +98,7 @@ export interface Review {
     id?: string;
     userId: string;
     mediaId: number;
-    mediaType: 'Movie' | 'TvShow' | 'Person';
+    mediaType: 'Movie' | 'TvShow' | 'Person' | 'Season' | 'Episode';
     userName: string;
     rating: number;
     comment: string;
@@ -103,7 +107,7 @@ export interface Review {
 
 export interface CreateReview {
     mediaId: number;
-    mediaType: 'Movie' | 'TvShow' | 'Person';
+    mediaType: 'Movie' | 'TvShow' | 'Person' | 'Season' | 'Episode';
     rating: number;
     comment: string;
 }

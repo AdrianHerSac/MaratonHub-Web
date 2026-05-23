@@ -14,9 +14,13 @@ import { RouterLink } from '@angular/router';
       @if (authService.isLoggedIn()) {
         <div class="form-group">
           <label>Calificación</label>
-          <div class="rating-selector">
+          <div class="rating-selector" (mouseleave)="hoverRating = 0">
             @for (star of [1, 2, 3, 4, 5]; track star) {
-              <button type="button" class="star-button" [class.active]="star <= rating" (click)="setRating(star)">★</button>
+              <button type="button" class="star-button" 
+                      [class.active]="star <= rating" 
+                      [class.hovered]="star <= hoverRating"
+                      (mouseenter)="hoverRating = star"
+                      (click)="setRating(star)">★</button>
             }
           </div>
         </div>
@@ -103,7 +107,8 @@ import { RouterLink } from '@angular/router';
       color: rgba(255, 215, 0, 0.8);
     }
 
-    .star-button.active {
+    .star-button.active,
+    .star-button.hovered {
       color: #ffd700;
     }
 
@@ -186,6 +191,7 @@ export class ReviewFormComponent {
     }>();
 
     rating = 0;
+    hoverRating = 0;
     comment = '';
 
     setRating(stars: number) {

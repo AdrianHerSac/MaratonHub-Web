@@ -45,6 +45,10 @@ export class ReviewService {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 
+    getBatchAverages(items: { mediaId: number, mediaType: string }[]): Observable<{ [key: string]: any }> {
+        return this.http.post<{ [key: string]: any }>(`${this.apiUrl}/average/batch`, items);
+    }
+
     // Debug: ver los claims del token tal como los ve el servidor
     debugClaims(): Observable<any> {
         return this.http.get<any>(`${this.apiUrl}/debug-claims`);
