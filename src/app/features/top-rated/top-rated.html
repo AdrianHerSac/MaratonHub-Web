@@ -83,6 +83,7 @@
         <div class="media-info">
           <h3>{{ item.title || item.name }}</h3>
           <span class="media-type">Famoso ({{ item.appTotalReviews }} votos)</span>
+          <p class="known-for" *ngIf="item.credits && item.credits.length > 0">Conocido/a por: {{ item.credits[0].title || item.credits[0].name }}</p>
         </div>
       </div>
     </div>

@@ -57,6 +57,7 @@ export interface Person {
     biography?: string;
     birthday?: Date;
     placeOfBirth?: string;
+    credits?: any[];
 }
 
 export interface Genre {

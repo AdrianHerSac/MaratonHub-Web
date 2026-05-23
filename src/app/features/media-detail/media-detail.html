@@ -83,18 +83,36 @@
     <!-- Main Content Section -->
     <div class="main-content">
 
-        <!-- Cast Section -->
+        <!-- Cast Section (For Movies/TV) -->
         @if (getCast().length > 0) {
         <div class="detail-section">
             <h2 class="section-title">Reparto Principal</h2>
             <div class="cast-grid">
                 @for (actor of getCast().slice(0, 8); track actor.id) {
-                <div class="cast-card">
+                <div class="cast-card" [routerLink]="['/person', actor.id]" style="cursor: pointer;">
                     <div class="actor-img-wrapper">
                         <img [src]="getActorImageUrl(actor.profilePath)" [alt]="actor.name" class="actor-img" />
                     </div>
                     <p class="actor-name">{{ actor.name }}</p>
                     <p class="actor-character">{{ actor.character }}</p>
+                </div>
+                }
+            </div>
+        </div>
+        }
+
+        <!-- Credits Section (For Persons) -->
+        @if (isPerson(media) && media.credits && media.credits.length > 0) {
+        <div class="detail-section">
+            <h2 class="section-title">Participaciones Destacadas</h2>
+            <div class="cast-grid">
+                @for (credit of media.credits.slice(0, 8); track credit.id) {
+                <div class="cast-card" [routerLink]="['/' + credit.mediaType, credit.id]" style="cursor: pointer;">
+                    <div class="actor-img-wrapper">
+                        <img [src]="getActorImageUrl(credit.posterPath)" [alt]="credit.title" class="actor-img" />
+                    </div>
+                    <p class="actor-name">{{ credit.title }}</p>
+                    <p class="actor-character">{{ credit.character }}</p>
                 </div>
                 }
             </div>
