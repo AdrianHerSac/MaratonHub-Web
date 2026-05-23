@@ -184,7 +184,7 @@ export class ReviewFormComponent {
     authService = inject(AuthService);
 
     @Input() mediaId!: number;
-    @Input() mediaType!: 'Movie' | 'TvShow' | 'Person';
+    @Input() mediaType!: 'Movie' | 'TvShow' | 'Person' | 'Season' | 'Episode';
     @Output() reviewSubmitted = new EventEmitter<{
         rating: number;
         comment: string;
