@@ -119,6 +119,48 @@
         </div>
         }
 
+        <!-- Seasons Section (For TV Shows) -->
+        @if (isTvShow(media) && media.seasons && media.seasons.length > 0) {
+        <div class="detail-section">
+            <h2 class="section-title">Temporadas ({{ media.numberOfSeasons }})</h2>
+            <div class="seasons-accordion">
+                @for (season of media.seasons; track season.id) {
+                <div class="season-item" [class.expanded]="season.expanded">
+                    <div class="season-header" (click)="toggleSeason(season)">
+                        <img [src]="getActorImageUrl(season.posterPath)" [alt]="season.name" class="season-thumb" *ngIf="season.posterPath" />
+                        <div class="season-info-header">
+                            <h3>{{ season.name }}</h3>
+                            <span class="season-meta">{{ season.episodeCount }} episodios &bull; {{ season.airDate | date: 'yyyy' }}</span>
+                        </div>
+                        <span class="toggle-icon">{{ season.expanded ? '▲' : '▼' }}</span>
+                    </div>
+                    @if (season.expanded) {
+                    <div class="season-body">
+                        <p class="season-overview" *ngIf="season.overview">{{ season.overview }}</p>
+                        @if (season.loading) {
+                            <div class="spinner-small">Cargando episodios...</div>
+                        } @else if (season.episodes) {
+                            <div class="episodes-list">
+                                @for (episode of season.episodes; track episode.id) {
+                                <div class="episode-item">
+                                    <img [src]="getActorImageUrl(episode.stillPath)" [alt]="episode.name" class="episode-still" />
+                                    <div class="episode-details">
+                                        <h4>{{ episode.episodeNumber }}. {{ episode.name }}</h4>
+                                        <p class="episode-overview">{{ episode.overview || 'Sin descripción' }}</p>
+                                        <span class="episode-meta">{{ episode.airDate | date: 'mediumDate' }} &bull; ⭐ {{ episode.voteAverage.toFixed(1) }}</span>
+                                    </div>
+                                </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+        }
+
         <!-- Trailer Section -->
         @if (hasTrailer()) {
         <div class="detail-section">

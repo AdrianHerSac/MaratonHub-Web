@@ -31,6 +31,31 @@ export interface TvShow {
     cast: CastMember[];
     director?: string;
     videos: Video[];
+    seasons?: Season[];
+}
+
+export interface Season {
+    id: number;
+    seasonNumber: number;
+    name: string;
+    overview: string;
+    posterPath?: string;
+    episodeCount: number;
+    airDate?: Date;
+    episodes?: Episode[];
+    // UI state
+    expanded?: boolean;
+    loading?: boolean;
+}
+
+export interface Episode {
+    id: number;
+    episodeNumber: number;
+    name: string;
+    overview: string;
+    stillPath?: string;
+    airDate?: Date;
+    voteAverage: number;
 }
 
 export interface CastMember {

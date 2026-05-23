@@ -160,6 +160,25 @@ export class MediaDetailComponent implements OnInit {
     return (this.media as Movie | TvShow).cast || [];
   }
 
+  toggleSeason(season: any) {
+    season.expanded = !season.expanded;
+    if (season.expanded && !season.episodes && this.mediaType === 'tv') {
+      season.loading = true;
+      this.tmdbService.getTvShowSeason(this.mediaId, season.seasonNumber).subscribe({
+        next: (data) => {
+          season.episodes = data.episodes;
+          season.loading = false;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Error fetching season details', err);
+          season.loading = false;
+          this.cdr.markForCheck();
+        }
+      });
+    }
+  }
+
   hasTrailer(): boolean {
     return this.getTrailerUrl() !== null;
   }

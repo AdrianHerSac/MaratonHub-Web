@@ -70,6 +70,10 @@ export class TmdbApiService {
         return this.http.get<TvShow>(`${this.apiUrl}/tvshows/${id}`);
     }
 
+    getTvShowSeason(tvId: number, seasonNumber: number): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/tvshows/${tvId}/season/${seasonNumber}`);
+    }
+
     getTopRatedTvShows(page: number = 1): Observable<TvShow[]> {
         const params = new HttpParams().set('page', page.toString());
         return this.http.get<TvShow[]>(`${this.apiUrl}/tvshows/top-rated`, { params });

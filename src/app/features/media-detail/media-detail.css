@@ -162,7 +162,118 @@
     width: 6px;
     height: 30px;
     background: linear-gradient(to bottom, #9333ea, #ec4899);
-    border-radius: 3px;
+    border-radius: 6px;
+}
+
+/* Seasons Accordion */
+.seasons-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.season-item {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: background-color 0.3s;
+}
+
+.season-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    cursor: pointer;
+    gap: 15px;
+}
+
+.season-header:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.season-thumb {
+    width: 50px;
+    height: 75px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.season-info-header {
+    flex: 1;
+}
+
+.season-info-header h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.1em;
+}
+
+.season-meta {
+    font-size: 0.9em;
+    color: #bbb;
+}
+
+.toggle-icon {
+    font-size: 1.2em;
+    color: #888;
+}
+
+.season-body {
+    padding: 0 15px 15px 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.season-overview {
+    font-size: 0.95em;
+    color: #ccc;
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+
+.episodes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.episode-item {
+    display: flex;
+    gap: 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.episode-still {
+    width: 120px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.episode-details h4 {
+    margin: 0 0 5px 0;
+    font-size: 1em;
+}
+
+.episode-overview {
+    font-size: 0.85em;
+    color: #999;
+    margin: 0 0 5px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.episode-meta {
+    font-size: 0.8em;
+    color: #777;
+}
+
+.spinner-small {
+    color: #999;
+    font-size: 0.9em;
+    padding: 10px 0;
 }
 
 .cast-grid {
