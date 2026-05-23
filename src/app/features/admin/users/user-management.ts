@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminService, UserManagementInfo } from '../../../core/services/admin.service';
 import { FormsModule } from '@angular/forms';
@@ -57,7 +57,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   get filteredUsers(): UserManagementInfo[] {
-    return this.users.filter(u => 
+    return this.users.filter(u =>
       u.username.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
       u.id.toLowerCase().includes(this.searchTerm.toLowerCase())
     );

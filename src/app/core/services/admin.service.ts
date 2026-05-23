@@ -6,8 +6,10 @@ import { environment } from '../../../environments/environment';
 export interface AdminStats {
   totalUsers: number;
   totalReviews: number;
+  connectedUsers: number;
   systemStatus: string;
   lastUpdate: string;
+  recentUsers: { username: string, createdAt: string, isOnline: boolean }[];
 }
 
 export interface UserManagementInfo {

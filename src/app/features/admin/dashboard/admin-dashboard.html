@@ -96,15 +96,16 @@
           Actividad Reciente
         </h2>
         <div class="space-y-4">
-          <div *ngFor="let i of [1,2,3]" class="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-800/30 transition-colors border border-transparent hover:border-gray-700">
-            <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400">
-              {{ i }}
+          <div *ngFor="let user of stats.recentUsers; let i = index" class="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-800/30 transition-colors border border-transparent hover:border-gray-700">
+            <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 font-bold">
+              {{ i + 1 }}
             </div>
             <div class="flex-1">
-              <p class="text-sm font-medium text-white">Nuevo usuario registrado</p>
-              <p class="text-xs text-gray-500">Hace {{ i * 5 }} minutos</p>
+              <p class="text-sm font-medium text-white">Nuevo usuario: <span class="text-purple-400">{{ user.username }}</span></p>
+              <p class="text-xs text-gray-500">{{ user.createdAt | date:'medium' }}</p>
             </div>
-            <span class="px-2 py-1 bg-green-500/10 text-green-500 text-[10px] font-bold rounded uppercase">Éxito</span>
+            <span *ngIf="user.isOnline" class="px-2 py-1 bg-green-500/10 text-green-500 text-[10px] font-bold rounded uppercase">Online</span>
+            <span *ngIf="!user.isOnline" class="px-2 py-1 bg-gray-500/10 text-gray-400 text-[10px] font-bold rounded uppercase">Offline</span>
           </div>
         </div>
       </div>
