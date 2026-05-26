@@ -424,3 +424,45 @@
         padding-top: 100px;
     }
 }
+
+/* Botón Volver Atrás */
+.back-action-container {
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.85);
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    transition: all 0.25s ease;
+    outline: none;
+    user-select: none;
+}
+
+.back-btn:hover {
+    background: rgba(147, 51, 234, 0.25);
+    border-color: rgba(147, 51, 234, 0.5);
+    color: #fff;
+    transform: translateX(-4px);
+    box-shadow: 0 4px 15px rgba(147, 51, 234, 0.2);
+}
+
+.back-arrow {
+    font-size: 1.1rem;
+    transition: transform 0.25s ease;
+}
+
+.back-btn:hover .back-arrow {
+    transform: translateX(-2px);
+}

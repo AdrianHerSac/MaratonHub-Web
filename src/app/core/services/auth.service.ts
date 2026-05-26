@@ -49,7 +49,8 @@ export class AuthService {
       this.currentUser.set({ 
         username, 
         role: role || 'User',
-        id: id
+        id: id,
+        email: `${username.toLowerCase()}@maratonhub.com`
       });
     }
   }
@@ -85,11 +86,26 @@ export class AuthService {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     localStorage.removeItem(this.roleKey);
+    localStorage.removeItem('maratonhub_email');
     this.currentUser.set(null);
     try {
       this.socialAuthService.signOut().catch(() => {});
     } catch (error) {
       console.error('Error signing out from Google:', error);
+    }
+  }
+
+  public updateProfile(newUsername: string, newEmail: string) {
+    const user = this.currentUser();
+    if (user) {
+      const updatedUser = {
+        ...user,
+        username: newUsername,
+        email: newEmail
+      };
+      this.currentUser.set(updatedUser);
+      localStorage.setItem(this.userKey, newUsername);
+      localStorage.setItem('maratonhub_email', newEmail);
     }
   }
 
@@ -107,6 +123,11 @@ export class AuthService {
       id = payload.sub;
     } catch (e) {}
 
-    this.currentUser.set({ username: response.username, role: response.role, id: id });
+    this.currentUser.set({ 
+      username: response.username, 
+      role: response.role, 
+      id: id,
+      email: `${response.username.toLowerCase()}@maratonhub.com`
+    });
   }
 }

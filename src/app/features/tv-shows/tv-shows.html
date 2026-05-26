@@ -25,40 +25,22 @@
         <button class="search-clear" (click)="clearSearch()" aria-label="Limpiar búsqueda">✕</button>
       }
     </div>
+    <div class="genre-select-wrapper">
+      <select id="genre-select" class="genre-select" [value]="selectedGenreKey" (change)="onGenreChange($event)">
+        @for (genre of genres; track genre.name) {
+          <option [value]="genre.name">{{ genre.emoji }} {{ genre.name }}</option>
+        }
+      </select>
+    </div>
   </div>
 
-  @if (loading) {
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Cargando series...</p>
-    </div>
-  } @else {
-
-    @if (searchQuery.length > 1) {
-      <section class="content-section">
-        <h2 class="section-title">🔍 Resultados para "{{ searchQuery }}"</h2>
-        <div class="media-grid">
-          @for (show of searchResultShows; track show.id) {
-            <a [routerLink]="['/tv', show.id]" class="media-card">
-              <div class="card-image">
-                <img [src]="getImageUrl(show.posterPath)" [alt]="show.name" loading="lazy" />
-                <div class="card-overlay">
-                  <div class="rating-badge" [style.borderColor]="getRatingColor(getShowRating(show.id))">
-                    <span class="rating-pct" [style.color]="getRatingColor(getShowRating(show.id))">
-                      {{ getShowRating(show.id) }}%
-                    </span>
-                    <span class="rating-label">MaratonHub</span>
-                  </div>
-                </div>
-              </div>
-              <div class="card-content">
-                <h3>{{ show.name }}</h3>
-                <p class="release-date">{{ show.firstAirDate ? (show.firstAirDate | date:'yyyy') : 'TBA' }}</p>
-              </div>
-            </a>
-          }
-        </div>
-      </section>
+  <!-- Vista "Todos" → Series Populares -->
+  @if (activeView === 'all') {
+    @if (loading) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Cargando series...</p>
+      </div>
     } @else {
       <section class="content-section">
         <h2 class="section-title">⭐ Series Populares</h2>
@@ -81,6 +63,81 @@
                 <p class="release-date">{{ show.firstAirDate ? (show.firstAirDate | date:'yyyy') : 'TBA' }}</p>
               </div>
             </a>
+          }
+        </div>
+      </section>
+    }
+  }
+
+  <!-- Vista por género -->
+  @if (activeView === 'genre') {
+    @if (genreLoading) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Cargando series...</p>
+      </div>
+    } @else {
+      <section class="content-section genre-section">
+        <div class="media-grid">
+          @for (show of genreTvShows; track show.id) {
+            <a [routerLink]="['/tv', show.id]" class="media-card">
+              <div class="card-image">
+                <img [src]="getImageUrl(show.posterPath)" [alt]="show.name" loading="lazy" />
+                <div class="card-overlay">
+                  <div class="rating-badge" [style.borderColor]="getRatingColor(getShowRating(show.id))">
+                    <span class="rating-pct" [style.color]="getRatingColor(getShowRating(show.id))">
+                      {{ getShowRating(show.id) }}%
+                    </span>
+                    <span class="rating-label">usuarios</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card-content">
+                <h3>{{ show.name }}</h3>
+                <p class="release-date">{{ show.firstAirDate ? (show.firstAirDate | date:'yyyy') : 'TBA' }}</p>
+              </div>
+            </a>
+          }
+          @if (genreTvShows.length === 0) {
+            <p class="empty-msg">No se encontraron series en esta categoría.</p>
+          }
+        </div>
+      </section>
+    }
+  }
+
+  <!-- Vista búsqueda por texto -->
+  @if (activeView === 'search') {
+    @if (searchLoading) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Buscando series...</p>
+      </div>
+    } @else {
+      <section class="content-section genre-section">
+        <h2 class="section-title">🔍 Resultados para "{{ searchQuery }}"</h2>
+        <div class="media-grid">
+          @for (show of searchResultShows; track show.id) {
+            <a [routerLink]="['/tv', show.id]" class="media-card">
+              <div class="card-image">
+                <img [src]="getImageUrl(show.posterPath)" [alt]="show.name" loading="lazy" />
+                <div class="card-overlay">
+                  <div class="rating-badge" [style.borderColor]="getRatingColor(getShowRating(show.id))">
+                    <span class="rating-pct" [style.color]="getRatingColor(getShowRating(show.id))">
+                      {{ getShowRating(show.id) }}%
+                    </span>
+                    <span class="rating-label">usuarios</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card-content">
+                <h3>{{ show.name }}</h3>
+                <p class="release-date">{{ show.firstAirDate ? (show.firstAirDate | date:'yyyy') : 'TBA' }}</p>
+              </div>
+            </a>
+          }
+          @if (searchResultShows.length === 0) {
+            <p class="empty-msg">No se encontraron series para tu búsqueda.</p>
           }
         </div>
       </section>

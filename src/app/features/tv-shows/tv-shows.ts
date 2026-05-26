@@ -7,6 +7,12 @@ import { TmdbApiService } from '../../core/services/tmdb-api.service';
 import { ReviewService } from '../../core/services/review.service';
 import { Movie, TvShow, Person } from '../../core/models/media.model';
 
+export interface GenreOption {
+  id: number | null;
+  name: string;
+  emoji: string;
+}
+
 @Component({
   selector: 'app-home',
   imports: [CommonModule, RouterModule],
@@ -30,6 +36,24 @@ export class TvShowsComponent implements OnInit, OnDestroy {
   movieRatings = new Map<number, number>();
   showRatings = new Map<number, number>();
 
+  selectedGenreId: number | null = null;
+  selectedGenreKey = 'Todos';
+  genreTvShows: TvShow[] = [];
+  genreLoading = false;
+  activeView: 'all' | 'genre' | 'search' = 'all';
+
+  genres: GenreOption[] = [
+    { id: null, name: 'Todos', emoji: '🎬' },
+    { id: 18, name: 'Drama', emoji: '🎭' },
+    { id: 35, name: 'Comedia', emoji: '😂' },
+    { id: 16, name: 'Animación', emoji: '🎨' },
+    { id: 10765, name: 'Ciencia Ficción y Fantasía', emoji: '🚀' },
+    { id: 10759, name: 'Acción y Aventura', emoji: '💥' },
+    { id: 99, name: 'Documental', emoji: '📽️' },
+    { id: 80, name: 'Crimen', emoji: '🔪' },
+    { id: 9648, name: 'Misterio', emoji: '🕵️' },
+  ];
+
   constructor(
     private tmdbService: TmdbApiService,
     private reviewService: ReviewService,
@@ -47,10 +71,12 @@ export class TvShowsComponent implements OnInit, OnDestroy {
           this.searchResultShows = [];
           this.searchResultPersons = [];
           this.searchLoading = false;
+          this.activeView = this.selectedGenreId !== null ? 'genre' : 'all';
           this.cdr.markForCheck();
           return of(null);
         }
         this.searchLoading = true;
+        this.activeView = 'search';
         this.cdr.markForCheck();
         return forkJoin({
           movies: this.tmdbService.searchMovies(query).pipe(catchError(() => of([]))),
@@ -65,6 +91,9 @@ export class TvShowsComponent implements OnInit, OnDestroy {
         this.searchResultPersons = (results as any).persons;
         this.searchLoading = false;
         this.cdr.markForCheck();
+        if ((results as any).shows && (results as any).shows.length > 0) {
+          this.loadRatings([], (results as any).shows);
+        }
       }
     });
   }
@@ -155,6 +184,42 @@ export class TvShowsComponent implements OnInit, OnDestroy {
     this.searchResultMovies = [];
     this.searchResultShows = [];
     this.searchResultPersons = [];
+    this.activeView = this.selectedGenreId !== null ? 'genre' : 'all';
     this.cdr.markForCheck();
+  }
+
+  selectView(genre: GenreOption) {
+    if (genre.id === null) {
+      this.activeView = 'all';
+      this.selectedGenreId = null;
+      this.genreTvShows = [];
+      return;
+    }
+
+    this.activeView = 'genre';
+    this.selectedGenreId = genre.id;
+    this.genreLoading = true;
+    this.genreTvShows = [];
+
+    this.tmdbService.getTvShowsByGenre(genre.id).subscribe({
+      next: (shows) => {
+        this.genreTvShows = shows;
+        this.genreLoading = false;
+        this.cdr.markForCheck();
+        this.loadRatings([], shows);
+      },
+      error: () => {
+        this.genreLoading = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  onGenreChange(event: Event) {
+    const name = (event.target as HTMLSelectElement).value;
+    this.selectedGenreKey = name;
+    this.searchQuery = '';
+    const genre = this.genres.find(g => g.name === name);
+    if (genre) this.selectView(genre);
   }
 }

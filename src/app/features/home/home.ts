@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { forkJoin, of, Subject, Subscription } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, switchMap, timeout } from 'rxjs/operators';
 import { TmdbApiService } from '../../core/services/tmdb-api.service';
@@ -36,11 +36,24 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     private tmdbService: TmdbApiService,
     private reviewService: ReviewService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
     this.loadData();
+    
+    // Subscribe to query parameters to handle search from navbar
+    this.route.queryParams.subscribe(params => {
+      const q = params['q'];
+      if (q) {
+        this.searchQuery = q;
+        this.searchSubject.next(q);
+      } else {
+        this.clearSearch();
+      }
+    });
+
     this.searchSub = this.searchSubject.pipe(
       debounceTime(400),
       distinctUntilChanged(),

@@ -61,6 +61,10 @@ export class TmdbApiService {
         return this.http.get<TvShow[]>(`${this.apiUrl}/tvshows/popular`, { params });
     }
 
+    getTvShowsByGenre(genreId: number): Observable<TvShow[]> {
+        return this.http.get<TvShow[]>(`${this.apiUrl}/tvshows/genero/${genreId}`);
+    }
+
     searchTvShows(query: string): Observable<TvShow[]> {
         const params = new HttpParams().set('query', query);
         return this.http.get<TvShow[]>(`${this.apiUrl}/tvshows/search`, { params });

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ReviewService } from '../../core/services/review.service';
+import { TmdbApiService } from '../../core/services/tmdb-api.service';
 import { Review } from '../../core/models/media.model';
 
 @Component({
@@ -16,13 +17,15 @@ export class MiListaComponent {
   reviews: Review[] = [];
   loading = true;
   error = false;
+  mediaTitles = new Map<string, string>();
 
   constructor(
     public authService: AuthService,
     private reviewService: ReviewService,
+    private tmdbService: TmdbApiService,
     private cdr: ChangeDetectorRef
   ) {
-    // Cargar y actualizar las valoraciones de forma reactiva cuando el usuario cambie (por ejemplo, tras el login de Google)
+    // Cargar y actualizar las valoraciones de forma reactiva cuando el usuario cambie
     effect(() => {
       this.loadReviews();
     });
@@ -38,6 +41,7 @@ export class MiListaComponent {
           this.reviews = reviews.sort(
             (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
+          this.hydrateReviews(this.reviews);
           this.loading = false;
           this.cdr.markForCheck();
         },
@@ -52,6 +56,56 @@ export class MiListaComponent {
       this.loading = false;
       this.cdr.markForCheck();
     }
+  }
+
+  hydrateReviews(reviews: Review[]) {
+    reviews.forEach(review => {
+      const cacheKey = `${review.mediaType}_${review.mediaId}`;
+      if (this.mediaTitles.has(cacheKey)) return;
+
+      // Colocar un texto de carga temporal
+      this.mediaTitles.set(cacheKey, 'Cargando título...');
+
+      if (review.mediaType === 'Movie') {
+        this.tmdbService.getMovieDetails(review.mediaId).subscribe({
+          next: (movie) => {
+            this.mediaTitles.set(cacheKey, movie.title);
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.mediaTitles.set(cacheKey, `Película (ID: ${review.mediaId})`);
+            this.cdr.markForCheck();
+          }
+        });
+      } else if (review.mediaType === 'TvShow') {
+        this.tmdbService.getTvShowDetails(review.mediaId).subscribe({
+          next: (show) => {
+            this.mediaTitles.set(cacheKey, show.name);
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.mediaTitles.set(cacheKey, `Serie (ID: ${review.mediaId})`);
+            this.cdr.markForCheck();
+          }
+        });
+      } else if (review.mediaType === 'Person') {
+        this.tmdbService.getPersonDetails(review.mediaId).subscribe({
+          next: (person) => {
+            this.mediaTitles.set(cacheKey, person.name);
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.mediaTitles.set(cacheKey, `Celebridad (ID: ${review.mediaId})`);
+            this.cdr.markForCheck();
+          }
+        });
+      }
+    });
+  }
+
+  getMediaTitle(review: Review): string {
+    const cacheKey = `${review.mediaType}_${review.mediaId}`;
+    return this.mediaTitles.get(cacheKey) || 'Cargando título...';
   }
 
   getMediaRoute(review: Review): string {

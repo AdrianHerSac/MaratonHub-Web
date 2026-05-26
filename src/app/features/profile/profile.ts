@@ -1,20 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { SocialService, User, FriendGroup } from '../../core/services/social.service';
+import { SocialService, User } from '../../core/services/social.service';
+import { GroupService } from '../../core/services/group.service';
+import { GroupSummary } from '../../core/models/group.model';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
 export class Profile implements OnInit {
-  activeTab: 'perfil' | 'social' | 'grupos' | 'configuracion' = 'perfil';
+  activeTab: 'perfil' | 'grupos' | 'configuracion' = 'perfil';
   
+  isEditing = false;
+  editUsername = '';
+  editEmail = '';
+
   // Settings
   emailNotifications = true;
   pushNotifications = true;
@@ -27,10 +33,17 @@ export class Profile implements OnInit {
 
   suggestedUsers: User[] = [];
 
+  // Real groups from backend database
+  groups: GroupSummary[] = [];
+  loadingGroups = false;
+  groupsError = '';
+
   constructor(
     public authService: AuthService,
     public socialService: SocialService,
-    private route: ActivatedRoute
+    private groupService: GroupService,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -39,26 +52,69 @@ export class Profile implements OnInit {
       const tab = params['tab'];
       if (tab === 'settings' || tab === 'configuracion') {
         this.activeTab = 'configuracion';
-      } else if (tab === 'social') {
-        this.activeTab = 'social';
       } else if (tab === 'groups' || tab === 'grupos') {
         this.activeTab = 'grupos';
       } else {
         this.activeTab = 'perfil';
       }
+      this.cdr.detectChanges();
     });
 
     this.loadSuggestedUsers();
+    this.loadRealGroups();
   }
 
-  setTab(tab: 'perfil' | 'social' | 'grupos' | 'configuracion') {
+  loadRealGroups() {
+    this.loadingGroups = true;
+    this.groupsError = '';
+    this.cdr.detectChanges();
+    this.groupService.getMyGroups().subscribe({
+      next: (data) => {
+        this.groups = data;
+        this.loadingGroups = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.groupsError = 'Error al cargar los grupos.';
+        this.loadingGroups = false;
+        this.cdr.detectChanges();
+        console.error('Error loading real groups:', err);
+      }
+    });
+  }
+
+  setTab(tab: 'perfil' | 'grupos' | 'configuracion') {
     this.activeTab = tab;
+    this.cdr.detectChanges();
+  }
+
+  startEdit() {
+    const user = this.authService.currentUser();
+    if (user) {
+      this.editUsername = user.username;
+      this.editEmail = user.email || '';
+      this.isEditing = true;
+      this.cdr.detectChanges();
+    }
+  }
+
+  cancelEdit() {
+    this.isEditing = false;
+    this.cdr.detectChanges();
+  }
+
+  saveEdit() {
+    if (!this.editUsername.trim() || !this.editEmail.trim()) return;
+    this.authService.updateProfile(this.editUsername.trim(), this.editEmail.trim());
+    this.isEditing = false;
+    this.cdr.detectChanges();
   }
 
   loadSuggestedUsers() {
     this.socialService.getSuggestedUsers().subscribe({
       next: (users) => {
         this.suggestedUsers = users;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -67,6 +123,7 @@ export class Profile implements OnInit {
     this.socialService.followUser(user.id).subscribe({
       next: () => {
         this.loadSuggestedUsers();
+        this.cdr.detectChanges();
       }
     });
   }
@@ -75,17 +132,27 @@ export class Profile implements OnInit {
     this.socialService.unfollowUser(userId).subscribe({
       next: () => {
         this.loadSuggestedUsers();
+        this.cdr.detectChanges();
       }
     });
   }
 
   createGroup() {
     if (!this.newGroupName.trim()) return;
-    this.socialService.createGroup(this.newGroupName, this.newGroupDesc).subscribe({
+    this.groupService.createGroup({
+      name: this.newGroupName.trim(),
+      description: this.newGroupDesc.trim()
+    }).subscribe({
       next: () => {
         this.newGroupName = '';
         this.newGroupDesc = '';
         this.showCreateForm = false;
+        this.loadRealGroups();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error creating real group:', err);
+        this.cdr.detectChanges();
       }
     });
   }

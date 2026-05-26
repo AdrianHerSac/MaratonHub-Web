@@ -178,10 +178,26 @@
                       @if (rating.comment) {
                         <p class="text-sm text-gray-400">{{rating.comment}}</p>
                       }
-                      <div class="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                        <span>{{rating.userName}}</span>
-                        <span>·</span>
-                        <span>{{formatDate(rating.createdAt)}}</span>
+                      <div class="flex items-center justify-between mt-3 pt-2 border-t border-gray-700/30">
+                        <div class="flex items-center gap-2 text-xs text-gray-500">
+                          <span>{{rating.userName}}</span>
+                          <span>·</span>
+                          <span>{{formatDate(rating.createdAt)}}</span>
+                        </div>
+                        
+                        <!-- Acciones y Distintivos de Valoración -->
+                        <div class="flex gap-2 items-center">
+                          @if (isCurrentUser(rating.userId)) {
+                            <span class="text-xs px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-medium">Tu valoración</span>
+                          } @else if (!hasUserRatedMedia(rating.mediaId, rating.mediaType)) {
+                            <button (click)="rateAlso(rating)"
+                              class="text-xs px-3 py-1 rounded bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-colors duration-200 shadow-sm">
+                              Valorar también
+                            </button>
+                          } @else {
+                            <span class="text-xs px-2 py-0.5 rounded bg-gray-700/50 text-gray-400 font-medium">Ya valorada por ti</span>
+                          }
+                        </div>
                       </div>
                     </div>
                   </div>

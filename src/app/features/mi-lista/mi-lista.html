@@ -100,6 +100,10 @@
             <span class="text-xs text-gray-500 font-medium">{{ formatDate(review.createdAt) }}</span>
           </div>
 
+          <h3 class="text-lg font-extrabold text-white mb-2 group-hover:text-purple-300 transition-colors line-clamp-1">
+            {{ getMediaTitle(review) }}
+          </h3>
+
           <div class="flex items-center gap-1 mb-4">
             @for (star of [1,2,3,4,5]; track star) {
             <svg class="w-5 h-5 transition-colors" [ngClass]="star <= review.rating ? 'text-amber-400' : 'text-gray-600'" fill="currentColor" viewBox="0 0 20 20">

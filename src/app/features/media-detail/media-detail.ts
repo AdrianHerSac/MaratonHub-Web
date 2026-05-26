@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, Location } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { combineLatest } from 'rxjs';
@@ -27,8 +27,13 @@ export class MediaDetailComponent implements OnInit {
     private tmdbService: TmdbApiService,
     private reviewService: ReviewService,
     private cdr: ChangeDetectorRef,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private location: Location
   ) { }
+
+  goBack() {
+    this.location.back();
+  }
 
   ngOnInit() {
     combineLatest([this.route.url, this.route.params]).subscribe(([urlSegments, params]) => {

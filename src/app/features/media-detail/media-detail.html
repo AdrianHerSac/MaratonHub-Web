@@ -10,6 +10,11 @@
     <div class="hero" [style.backgroundImage]="'url(' + getBackdropUrl() + ')'">
         <div class="hero-overlay"></div>
         <div class="hero-content">
+            <div class="back-action-container">
+                <button class="back-btn" (click)="goBack()">
+                    <span class="back-arrow">←</span> Volver atrás
+                </button>
+            </div>
             <div class="media-info">
                 <img [src]="getPosterUrl()" [alt]="getTitle()" class="poster" />
                 <div class="info-text">

@@ -261,15 +261,18 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
     if (!this.group?.id) return;
     this.submittingRating = true;
     this.ratingError = '';
+    this.cdr.detectChanges();
     this.groupService.createGroupRating(this.group.id, this.ratingDto).subscribe({
       next: () => {
         this.submittingRating = false;
         this.showRatingModal = false;
         this.loadRatings(this.group!.id!);
+        this.cdr.detectChanges();
       },
       error: () => {
         this.submittingRating = false;
         this.ratingError = 'Error al enviar la valoración';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -294,6 +297,26 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
 
   starsArray(rating: number): number[] {
     return Array(5).fill(0).map((_, i) => i < rating ? 1 : 0);
+  }
+
+  hasUserRatedMedia(mediaId: number, mediaType: string): boolean {
+    const currentUserId = this.authService.currentUser()?.id;
+    return this.ratings.some(r => r.mediaId === mediaId && r.mediaType === mediaType && r.userId === currentUserId);
+  }
+
+  rateAlso(rating: GroupRating): void {
+    this.showRatingModal = true;
+    this.ratingDto = {
+      mediaId: rating.mediaId,
+      mediaType: rating.mediaType as 'Movie' | 'TvShow' | 'Person',
+      mediaTitle: rating.mediaTitle,
+      posterPath: rating.posterPath || '',
+      rating: 5,
+      comment: ''
+    };
+    this.ratingError = '';
+    this.clearSearch();
+    this.cdr.detectChanges();
   }
 
   onSearchInput(event: Event) {

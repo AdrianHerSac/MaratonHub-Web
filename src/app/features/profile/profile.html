@@ -17,12 +17,7 @@
         Mi Perfil
       </button>
 
-      <button [class.active]="activeTab === 'social'" (click)="setTab('social')">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-        </svg>
-        Comunidad
-      </button>
+
 
       <button [class.active]="activeTab === 'grupos'" (click)="setTab('grupos')">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,71 +43,63 @@
     
     <!-- Tab 1: Mi Perfil -->
     <section *ngIf="activeTab === 'perfil'" class="tab-content">
-      <h2>Mi Perfil</h2>
+      <div class="section-header">
+        <h2>Mi Perfil</h2>
+        <button *ngIf="!isEditing" class="btn-secondary btn-sm" (click)="startEdit()">
+          Editar Perfil
+        </button>
+      </div>
+      
       <div class="info-card">
-        <div class="info-group">
-          <label>Nombre de Usuario</label>
-          <p>{{ authService.currentUser()?.username }}</p>
-        </div>
-        <div class="info-group">
-          <label>Identificador Único (ID)</label>
-          <p>{{ authService.currentUser()?.id || 'No asignado' }}</p>
-        </div>
+        <ng-container *ngIf="!isEditing">
+          <div class="info-group">
+            <label>Nombre de Usuario</label>
+            <p>{{ authService.currentUser()?.username }}</p>
+          </div>
+          <div class="info-group">
+            <label>Correo Electrónico</label>
+            <p>{{ authService.currentUser()?.email }}</p>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="isEditing">
+          <div class="info-group">
+            <label for="edit-username">Nombre de Usuario</label>
+            <input 
+              id="edit-username"
+              type="text" 
+              class="profile-input" 
+              [(ngModel)]="editUsername" 
+              name="editUsername" 
+              required
+            />
+          </div>
+          <div class="info-group">
+            <label for="edit-email">Correo Electrónico</label>
+            <input 
+              id="edit-email"
+              type="email" 
+              class="profile-input" 
+              [(ngModel)]="editEmail" 
+              name="editEmail" 
+              required
+            />
+          </div>
+        </ng-container>
+        
+        
         <div class="info-group">
           <label>Rol de Cuenta</label>
           <p>{{ authService.currentUser()?.role === 'Admin' ? 'Administrador del Sitio' : 'Miembro Regular' }}</p>
         </div>
-      </div>
-    </section>
 
-    <!-- Tab 2: Comunidad -->
-    <section *ngIf="activeTab === 'social'" class="tab-content">
-      <div class="section-header">
-        <h2>Comunidad</h2>
-      </div>
-
-      <div class="social-grid">
-        <!-- Siguiendo -->
-        <div class="social-section">
-          <h3>Siguiendo ({{ socialService.following().length }})</h3>
-          <div class="user-list">
-            <div *ngFor="let user of socialService.following()" class="user-item">
-              <div class="user-info">
-                <div class="small-avatar">
-                  {{ user.username[0].toUpperCase() }}
-                </div>
-                <span>{{ user.username }}</span>
-              </div>
-              <button class="btn-unfollow" (click)="unfollow(user.id)">Dejar de seguir</button>
-            </div>
-            
-            <p *ngIf="socialService.following().length === 0" class="empty-text">
-              No sigues a nadie todavía. ¡Explora las sugerencias!
-            </p>
-          </div>
-        </div>
-
-        <!-- Sugerencias -->
-        <div class="social-section">
-          <h3>Sugerencias para ti</h3>
-          <div class="user-list">
-            <div *ngFor="let user of suggestedUsers" class="user-item">
-              <div class="user-info">
-                <div class="small-avatar">
-                  {{ user.username[0].toUpperCase() }}
-                </div>
-                <span>{{ user.username }}</span>
-              </div>
-              <button class="btn-follow-small" (click)="follow(user)">Seguir</button>
-            </div>
-
-            <p *ngIf="suggestedUsers.length === 0" class="empty-text">
-              No hay sugerencias disponibles en este momento.
-            </p>
-          </div>
+        <div *ngIf="isEditing" class="edit-actions">
+          <button class="btn-primary" (click)="saveEdit()">Guardar Cambios</button>
+          <button class="btn-secondary" (click)="cancelEdit()">Cancelar</button>
         </div>
       </div>
     </section>
+
 
     <!-- Tab 3: Mis Grupos -->
     <section *ngIf="activeTab === 'grupos'" class="tab-content">
@@ -140,16 +127,24 @@
         <button type="submit" class="btn-primary">Confirmar y Crear</button>
       </form>
 
+      <!-- Loading groups -->
+      <div *ngIf="loadingGroups" style="text-align: center; padding: 40px 0; color: #777;">
+        <div class="spinner"></div>
+        <p>Cargando tus grupos...</p>
+      </div>
+
       <!-- Groups List -->
-      <div *ngIf="socialService.groups().length > 0; else noGroups" class="groups-grid">
-        <div *ngFor="let group of socialService.groups()" class="glass-card group-card">
-          <div class="group-header">
-            <h4>{{ group.name }}</h4>
-            <span class="member-count">{{ group.members.length + 1 }} miembros</span>
-          </div>
-          <p>{{ group.description || 'Sin descripción disponible.' }}</p>
-          <div class="group-actions">
-            <button class="btn-secondary btn-sm">Ver detalles</button>
+      <div *ngIf="!loadingGroups">
+        <div *ngIf="groups.length > 0; else noGroups" class="groups-grid">
+          <div *ngFor="let group of groups" class="glass-card group-card">
+            <div class="group-header">
+              <h4>{{ group.name }}</h4>
+              <span class="member-count">{{ group.memberCount }} miembros</span>
+            </div>
+            <p>{{ group.description || 'Sin descripción disponible.' }}</p>
+            <div class="group-actions">
+              <button class="btn-secondary btn-sm" [routerLink]="['/groups', group.id]">Ver detalles</button>
+            </div>
           </div>
         </div>
       </div>

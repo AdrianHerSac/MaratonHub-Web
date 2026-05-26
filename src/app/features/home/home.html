@@ -106,7 +106,10 @@
         <div class="card-image">
           <img [src]="getImageUrl(person.profilePath)" [alt]="person.name" loading="lazy" />
           <div class="card-overlay">
-            <div class="popularity">{{ person.popularity.toFixed(0) }}</div>
+            <div class="rating-badge" [style.borderColor]="getRatingColor(person.popularity)">
+              <span class="rating-pct" [style.color]="getRatingColor(person.popularity)">{{ person.popularity.toFixed(0) }}%</span>
+              <span class="rating-label">popular</span>
+            </div>
           </div>
         </div>
         <div class="card-content">
@@ -189,8 +192,9 @@
         <div class="card-image">
           <img [src]="getImageUrl(person.profilePath)" [alt]="person.name" />
           <div class="card-overlay">
-            <div class="popularity">
-              {{ person.popularity.toFixed(0) }}
+            <div class="rating-badge" [style.borderColor]="getRatingColor(person.popularity)">
+              <span class="rating-pct" [style.color]="getRatingColor(person.popularity)">{{ person.popularity.toFixed(0) }}%</span>
+              <span class="rating-label">popular</span>
             </div>
           </div>
         </div>
