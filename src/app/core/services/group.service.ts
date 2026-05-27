@@ -65,6 +65,10 @@ export class GroupService {
     return this.http.post<GroupRating>(`${this.apiUrl}/${id}/ratings`, dto);
   }
 
+  deleteGroupRating(id: string, ratingId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}/ratings/${ratingId}`);
+  }
+
   getGroupAverageRating(id: string, mediaType: string, mediaId: number): Observable<{ averageRating: number; totalRatings: number }> {
     return this.http.get<{ averageRating: number; totalRatings: number }>(`${this.apiUrl}/${id}/ratings/average/${mediaType}/${mediaId}`);
   }

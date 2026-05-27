@@ -40,18 +40,25 @@ export class AuthService {
     const username = localStorage.getItem(this.userKey);
     const role = localStorage.getItem(this.roleKey);
     if (token && username) {
-      let id = undefined;
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        id = payload.sub;
-      } catch (e) {}
+        const isExpired = payload.exp ? (payload.exp * 1000 < Date.now()) : false;
+        if (isExpired) {
+          console.warn('El token en almacenamiento ha expirado. Limpiando sesión...');
+          this.logout();
+          return;
+        }
 
-      this.currentUser.set({ 
-        username, 
-        role: role || 'User',
-        id: id,
-        email: `${username.toLowerCase()}@maratonhub.com`
-      });
+        const id = payload.sub;
+        this.currentUser.set({ 
+          username, 
+          role: role || 'User',
+          id: id,
+          email: `${username.toLowerCase()}@maratonhub.com`
+        });
+      } catch (e) {
+        this.logout();
+      }
     }
   }
 

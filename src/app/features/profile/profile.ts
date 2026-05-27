@@ -15,16 +15,11 @@ import { GroupSummary } from '../../core/models/group.model';
   styleUrl: './profile.css',
 })
 export class Profile implements OnInit {
-  activeTab: 'perfil' | 'grupos' | 'configuracion' = 'perfil';
+  activeTab: 'perfil' | 'grupos' = 'perfil';
   
   isEditing = false;
   editUsername = '';
   editEmail = '';
-
-  // Settings
-  emailNotifications = true;
-  pushNotifications = true;
-  publicProfile = true;
 
   // Groups creation
   showCreateForm = false;
@@ -47,12 +42,10 @@ export class Profile implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Escuchar parámetros de consulta para cambiar de pestaña activa (ej. ?tab=settings)
+    // Escuchar parámetros de consulta para cambiar de pestaña activa (ej. ?tab=groups)
     this.route.queryParams.subscribe((params) => {
       const tab = params['tab'];
-      if (tab === 'settings' || tab === 'configuracion') {
-        this.activeTab = 'configuracion';
-      } else if (tab === 'groups' || tab === 'grupos') {
+      if (tab === 'groups' || tab === 'grupos') {
         this.activeTab = 'grupos';
       } else {
         this.activeTab = 'perfil';
@@ -83,7 +76,7 @@ export class Profile implements OnInit {
     });
   }
 
-  setTab(tab: 'perfil' | 'grupos' | 'configuracion') {
+  setTab(tab: 'perfil' | 'grupos') {
     this.activeTab = tab;
     this.cdr.detectChanges();
   }

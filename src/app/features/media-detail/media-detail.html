@@ -210,7 +210,7 @@
             <app-review-form [mediaId]="mediaId"
                 [mediaType]="mediaType === 'movie' ? 'Movie' : mediaType === 'tv' ? 'TvShow' : 'Person'"
                 (reviewSubmitted)="onReviewSubmitted($event)"></app-review-form>
-            <app-review-list [reviews]="reviews"></app-review-list>
+            <app-review-list [reviews]="reviews" (deleteReview)="onDeleteReview($event)"></app-review-list>
         </div>
 
     </div>

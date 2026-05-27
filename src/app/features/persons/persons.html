@@ -15,13 +15,6 @@
         <button class="search-clear" (click)="clearSearch()" aria-label="Limpiar búsqueda">✕</button>
       }
     </div>
-    <div class="genre-select-wrapper">
-      <select id="dept-select" class="genre-select" [value]="selectedDeptKey" (change)="onDeptChange($event)">
-        @for (dept of departments; track dept.name) {
-          <option [value]="dept.name">{{ dept.emoji }} {{ dept.name }}</option>
-        }
-      </select>
-    </div>
   </div>
 
   @if (activeView === 'all') {

@@ -281,6 +281,26 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
     return userId === this.authService.currentUser()?.id;
   }
 
+  canDeleteRating(ratingUserId: string): boolean {
+    return this.isCurrentUser(ratingUserId) || this.myRole === 'Admin' || this.authService.isAdmin();
+  }
+
+  deleteRating(ratingId: string, event: Event): void {
+    event.stopPropagation();
+    if (!this.group?.id) return;
+    if (!confirm('¿Estás seguro de que deseas eliminar esta valoración?')) return;
+    
+    this.groupService.deleteGroupRating(this.group.id, ratingId).subscribe({
+      next: () => {
+        this.loadRatings(this.group!.id!);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error deleting rating:', err);
+      }
+    });
+  }
+
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
     const now = new Date();

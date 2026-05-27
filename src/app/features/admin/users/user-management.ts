@@ -2,11 +2,12 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminService, UserManagementInfo } from '../../../core/services/admin.service';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './user-management.html',
   styleUrl: './user-management.css'
 })
@@ -15,7 +16,10 @@ export class UserManagementComponent implements OnInit {
   loading = true;
   searchTerm = '';
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -23,14 +27,17 @@ export class UserManagementComponent implements OnInit {
 
   loadUsers(): void {
     this.loading = true;
+    this.cdr.detectChanges();
     this.adminService.getUsers().subscribe({
       next: (data) => {
         this.users = data;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading users', err);
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -40,8 +47,12 @@ export class UserManagementComponent implements OnInit {
       this.adminService.deleteUser(userId).subscribe({
         next: () => {
           this.users = this.users.filter(u => u.id !== userId);
+          this.cdr.detectChanges();
         },
-        error: (err) => console.error('Error deleting user', err)
+        error: (err) => {
+          console.error('Error deleting user', err);
+          this.cdr.detectChanges();
+        }
       });
     }
   }
@@ -51,8 +62,12 @@ export class UserManagementComponent implements OnInit {
     this.adminService.updateUserRole(user.id, newRole).subscribe({
       next: () => {
         user.role = newRole;
+        this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error updating role', err)
+      error: (err) => {
+        console.error('Error updating role', err);
+        this.cdr.detectChanges();
+      }
     });
   }
 

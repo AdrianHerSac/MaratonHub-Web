@@ -1,12 +1,21 @@
 <div class="min-h-screen bg-[#0f172a] text-white p-8">
   <div class="max-w-7xl mx-auto">
-    <!-- Breadcrumbs / Header -->
-    <div class="flex items-center gap-2 text-sm text-gray-400 mb-4">
-      <a routerLink="/admin" class="hover:text-purple-400 transition-colors">Admin</a>
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-      </svg>
-      <span class="text-gray-200">Usuarios</span>
+    <!-- Back Button & Breadcrumbs -->
+    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <a routerLink="/admin" class="flex items-center gap-2 px-4 py-2 bg-gray-800/80 hover:bg-gray-700 border border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white rounded-xl transition-all text-sm font-semibold shadow-lg shadow-black/10">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Volver al Panel
+      </a>
+      
+      <div class="flex items-center gap-2 text-sm text-gray-400">
+        <a routerLink="/admin" class="hover:text-purple-400 transition-colors">Admin</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <span class="text-gray-200">Usuarios</span>
+      </div>
     </div>
 
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">

@@ -1,6 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Review } from '../../../core/models/media.model';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
     selector: 'app-review-list',
@@ -20,7 +21,21 @@ import { Review } from '../../../core/models/media.model';
               <div class="user-info">
                 <div class="avatar">{{ review.userName.charAt(0).toUpperCase() }}</div>
                 <div>
-                  <h4>{{ review.userName }}</h4>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <h4>{{ review.userName }}</h4>
+                    @if (canDelete(review)) {
+                      <button (click)="onDelete(review.id)" 
+                              class="delete-btn" 
+                              title="Eliminar opinión"
+                              style="background: none; border: none; color: rgba(255, 255, 255, 0.4); cursor: pointer; padding: 2px; display: flex; align-items: center; transition: color 0.2s;"
+                              onmouseover="this.style.color='#f87171'"
+                              onmouseout="this.style.color='rgba(255, 255, 255, 0.4)'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                      </button>
+                    }
+                  </div>
                   <p class="date">{{ formatDate(review.createdAt) }}</p>
                 </div>
               </div>
@@ -134,7 +149,25 @@ import { Review } from '../../../core/models/media.model';
   `]
 })
 export class ReviewListComponent {
+    authService = inject(AuthService);
+
     @Input() reviews: Review[] = [];
+    @Output() deleteReview = new EventEmitter<string>();
+
+    isCurrentUser(userId: string): boolean {
+        return userId === this.authService.currentUser()?.id;
+    }
+
+    canDelete(review: Review): boolean {
+        return this.isCurrentUser(review.userId) || this.authService.isAdmin();
+    }
+
+    onDelete(id: string | undefined) {
+        if (!id) return;
+        if (confirm('¿Estás seguro de que deseas eliminar esta opinión?')) {
+            this.deleteReview.emit(id);
+        }
+    }
 
     formatDate(date: Date): string {
         const d = new Date(date);

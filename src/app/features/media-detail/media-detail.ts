@@ -1,10 +1,11 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule, DatePipe, Location } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { TmdbApiService } from '../../core/services/tmdb-api.service';
 import { ReviewService } from '../../core/services/review.service';
+import { SignalRService } from '../../core/services/signalr.service';
 import { Movie, TvShow, Person, Review, Video, CastMember } from '../../core/models/media.model';
 import { ReviewFormComponent } from '../../shared/components/review-form/review-form.component';
 import { ReviewListComponent } from '../../shared/components/review-list/review-list.component';
@@ -15,7 +16,7 @@ import { ReviewListComponent } from '../../shared/components/review-list/review-
   templateUrl: './media-detail.html',
   styleUrl: './media-detail.css'
 })
-export class MediaDetailComponent implements OnInit {
+export class MediaDetailComponent implements OnInit, OnDestroy {
   mediaType: 'movie' | 'tv' | 'person' = 'movie';
   mediaId!: number;
   media: Movie | TvShow | Person | null = null;
@@ -26,10 +27,17 @@ export class MediaDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private tmdbService: TmdbApiService,
     private reviewService: ReviewService,
+    private signalRService: SignalRService,
     private cdr: ChangeDetectorRef,
     private sanitizer: DomSanitizer,
-    private location: Location
+    private location: Location,
+    private ngZone: NgZone
   ) { }
+
+  private signalRSub?: Subscription;
+  private pollInterval: any;
+  private lastReviewCount = 0;
+  private lastReviewIds = new Set<string>();
 
   goBack() {
     this.location.back();
@@ -43,7 +51,59 @@ export class MediaDetailComponent implements OnInit {
       this.mediaId = +params['id'];
       this.loadMediaDetails();
       this.loadReviews();
+      this.startPolling();
     });
+
+    // SignalR como canal extra (si está disponible)
+    this.signalRSub = this.signalRService.onReviewUpdate.subscribe((data) => {
+      if (data && data.mediaId === this.mediaId) {
+        const mediaTypeMap: Record<string, string> = { 'movie': 'Movie', 'tv': 'TvShow', 'person': 'Person' };
+        if (data.mediaType === mediaTypeMap[this.mediaType]) {
+          this.loadReviews();
+        }
+      }
+    });
+  }
+
+  private startPolling() {
+    this.stopPolling();
+    // Polling cada 8 segundos fuera de la zona Angular para no sobrecargar la detección de cambios
+    this.ngZone.runOutsideAngular(() => {
+      this.pollInterval = setInterval(() => {
+        const mediaTypeMap: Record<string, string> = { 'movie': 'Movie', 'tv': 'TvShow', 'person': 'Person' };
+        const dbType = mediaTypeMap[this.mediaType];
+        this.reviewService.getReviewsByMedia(dbType, this.mediaId).subscribe({
+          next: (reviews) => {
+            // Solo actualizar si hay cambios reales (nuevas reseñas o cambios en las existentes)
+            const newIds = new Set(reviews.map((r: Review) => r.id ?? ''));
+            const hasChanges =
+              reviews.length !== this.lastReviewCount ||
+              reviews.some((r: Review) => !this.lastReviewIds.has(r.id ?? ''));
+
+            if (hasChanges) {
+              this.ngZone.run(() => {
+                this.reviews = reviews;
+                this.lastReviewCount = reviews.length;
+                this.lastReviewIds = newIds;
+                this.cdr.detectChanges();
+              });
+            }
+          }
+        });
+      }, 8000);
+    });
+  }
+
+  private stopPolling() {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
+  }
+
+  ngOnDestroy() {
+    this.stopPolling();
+    this.signalRSub?.unsubscribe();
   }
 
   loadMediaDetails() {
@@ -54,12 +114,12 @@ export class MediaDetailComponent implements OnInit {
         next: (data) => {
           this.media = data;
           this.loading = false;
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error loading movie:', err);
           this.loading = false;
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         }
       });
     } else if (this.mediaType === 'tv') {
@@ -75,17 +135,17 @@ export class MediaDetailComponent implements OnInit {
                 (this.media as TvShow).seasons!.forEach(s => {
                   s.appRating = avgs[`Season_${s.id}`];
                 });
-                this.cdr.markForCheck();
+                this.cdr.detectChanges();
               }
             });
           }
 
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error loading TV show:', err);
           this.loading = false;
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         }
       });
     } else if (this.mediaType === 'person') {
@@ -93,12 +153,12 @@ export class MediaDetailComponent implements OnInit {
         next: (data) => {
           this.media = data;
           this.loading = false;
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error loading person:', err);
           this.loading = false;
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         }
       });
     }
@@ -109,7 +169,7 @@ export class MediaDetailComponent implements OnInit {
     this.reviewService.getReviewsByMedia(mediaTypeMap[this.mediaType], this.mediaId).subscribe({
       next: (reviews) => {
         this.reviews = reviews;
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading reviews:', err)
     });
@@ -194,16 +254,16 @@ export class MediaDetailComponent implements OnInit {
                 season.episodes.forEach((e: any) => {
                   e.appRating = avgs[`Episode_${e.id}`];
                 });
-                this.cdr.markForCheck();
+                this.cdr.detectChanges();
               }
             });
           }
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error fetching season details', err);
           season.loading = false;
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         }
       });
     }
@@ -224,7 +284,7 @@ export class MediaDetailComponent implements OnInit {
         this.reviewService.getBatchAverages([{ mediaId: targetId, mediaType }]).subscribe({
           next: (avgs) => {
             targetItem.appRating = avgs[`${mediaType}_${targetId}`];
-            this.cdr.markForCheck();
+            this.cdr.detectChanges();
           }
         });
       },
@@ -249,5 +309,15 @@ export class MediaDetailComponent implements OnInit {
 
   getUserRatingStars(): number[] {
     return [1, 2, 3, 4, 5];
+  }
+
+  onDeleteReview(id: string) {
+    this.reviewService.deleteReview(id).subscribe({
+      next: () => {
+        this.loadReviews();
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error deleting review:', err)
+    });
   }
 }

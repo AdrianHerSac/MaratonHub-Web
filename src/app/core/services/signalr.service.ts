@@ -12,11 +12,13 @@ export class SignalRService implements OnDestroy {
   private notificationSubject = new Subject<NotificationModel>();
   private unreadCountSubject = new Subject<number>();
   private connectedSubject = new BehaviorSubject<boolean>(false);
+  private reviewUpdateSubject = new Subject<any>();
 
   public onMessage = this.messageSubject.asObservable();
   public onNotification = this.notificationSubject.asObservable();
   public onUnreadCount = this.unreadCountSubject.asObservable();
   public onConnected = this.connectedSubject.asObservable();
+  public onReviewUpdate = this.reviewUpdateSubject.asObservable();
 
   constructor(private authService: AuthService, private zone: NgZone) {}
 
@@ -38,6 +40,10 @@ export class SignalRService implements OnDestroy {
 
     this.hubConnection.on('ReceiveMessage', (message: ChatMessage) => {
       this.zone.run(() => this.messageSubject.next(message));
+    });
+
+    this.hubConnection.on('MediaReviewUpdated', (data: any) => {
+      this.zone.run(() => this.reviewUpdateSubject.next(data));
     });
 
     this.hubConnection.start()
@@ -66,12 +72,16 @@ export class SignalRService implements OnDestroy {
 
   async joinGroup(groupId: string): Promise<void> {
     if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
+      console.log('SignalR: Uniendo a grupo:', groupId);
       await this.hubConnection.invoke('JoinGroup', groupId);
+    } else {
+      console.warn('SignalR: No se pudo unir a grupo porque no está conectado. Estado:', this.hubConnection?.state);
     }
   }
 
   async leaveGroup(groupId: string): Promise<void> {
     if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
+      console.log('SignalR: Saliendo del grupo:', groupId);
       await this.hubConnection.invoke('LeaveGroup', groupId);
     }
   }

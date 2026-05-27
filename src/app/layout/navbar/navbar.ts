@@ -141,11 +141,6 @@ export class Navbar implements OnInit, OnDestroy {
     this.isUserDropdownOpen = false;
   }
 
-  goToSettings(): void {
-    this.router.navigate(['/perfil'], { queryParams: { tab: 'configuracion' } });
-    this.isUserDropdownOpen = false;
-  }
-
   logout(): void {
     console.log('Cerrando sesión...');
     this.authService.logout();
