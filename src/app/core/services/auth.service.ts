@@ -119,7 +119,11 @@ export class AuthService {
       localStorage.setItem(this.userKey, newUsername);
       localStorage.setItem('maratonhub_email', newEmail);
       if (newAvatarUrl) {
-        localStorage.setItem(this.avatarKey, newAvatarUrl);
+        try {
+          localStorage.setItem(this.avatarKey, newAvatarUrl);
+        } catch (e) {
+          console.error('Error saving avatar to local storage. It might be too large.', e);
+        }
       } else {
         localStorage.removeItem(this.avatarKey);
       }
