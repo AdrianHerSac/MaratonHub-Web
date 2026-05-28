@@ -20,6 +20,7 @@ export class Profile implements OnInit {
   isEditing = false;
   editUsername = '';
   editEmail = '';
+  editAvatarUrl = '';
 
   // Groups creation
   showCreateForm = false;
@@ -86,6 +87,7 @@ export class Profile implements OnInit {
     if (user) {
       this.editUsername = user.username;
       this.editEmail = user.email || '';
+      this.editAvatarUrl = user.avatarUrl || '';
       this.isEditing = true;
       this.cdr.detectChanges();
     }
@@ -98,9 +100,21 @@ export class Profile implements OnInit {
 
   saveEdit() {
     if (!this.editUsername.trim() || !this.editEmail.trim()) return;
-    this.authService.updateProfile(this.editUsername.trim(), this.editEmail.trim());
+    this.authService.updateProfile(this.editUsername.trim(), this.editEmail.trim(), this.editAvatarUrl.trim());
     this.isEditing = false;
     this.cdr.detectChanges();
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.editAvatarUrl = e.target.result;
+        this.cdr.detectChanges();
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   loadSuggestedUsers() {

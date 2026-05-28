@@ -3,7 +3,8 @@
   <aside class="sidebar">
     <div class="user-summary">
       <div class="avatar">
-        {{ authService.currentUser()?.username?.[0] || 'U' }}
+        <img *ngIf="authService.currentUser()?.avatarUrl" [src]="authService.currentUser()?.avatarUrl" alt="Avatar" class="avatar-img" />
+        <span *ngIf="!authService.currentUser()?.avatarUrl">{{ authService.currentUser()?.username?.[0] || 'U' }}</span>
       </div>
       <h3>{{ authService.currentUser()?.username }}</h3>
       <p>{{ authService.currentUser()?.role === 'Admin' ? 'Administrador' : 'Miembro' }}</p>
@@ -74,6 +75,14 @@
               name="editEmail" 
               required
             />
+          </div>
+          <div class="info-group">
+            <label>Foto de Perfil</label>
+            <div class="avatar-edit-preview">
+              <img *ngIf="editAvatarUrl" [src]="editAvatarUrl" alt="Preview" class="avatar-img-preview" />
+              <div *ngIf="!editAvatarUrl" class="avatar-placeholder">{{ editUsername[0] || 'U' }}</div>
+            </div>
+            <input type="file" accept="image/*" (change)="onFileSelected($event)" class="profile-input file-input" />
           </div>
         </ng-container>
         

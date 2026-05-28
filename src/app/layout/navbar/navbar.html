@@ -131,8 +131,9 @@
                   <button (click)="toggleUserDropdown()"
                       class="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-800 transition-colors duration-300">
                       <div
-                          class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-pink-500 flex items-center justify-center text-white font-semibold uppercase">
-                          {{authService.currentUser()?.username?.[0] || 'U'}}
+                          class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-pink-500 flex items-center justify-center text-white font-semibold uppercase overflow-hidden">
+                          <img *ngIf="authService.currentUser()?.avatarUrl" [src]="authService.currentUser()?.avatarUrl" alt="Avatar" class="w-full h-full object-cover" />
+                          <span *ngIf="!authService.currentUser()?.avatarUrl">{{authService.currentUser()?.username?.[0] || 'U'}}</span>
                       </div>
                       <span class="text-white hidden sm:block">{{ authService.currentUser()?.username }}</span>
                       <span *ngIf="authService.isAdmin()" class="ml-2 px-1.5 py-0.5 rounded bg-amber-500 text-[10px] font-bold text-white uppercase tracking-wider">Admin</span>
@@ -248,8 +249,9 @@
         <div class="pt-4 border-t border-gray-800">
             @if(authService.isLoggedIn()){
                 <div class="flex items-center space-x-3 px-3 py-2">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-pink-500 flex items-center justify-center text-white font-semibold uppercase text-lg">
-                        {{authService.currentUser()?.username?.[0] || 'U'}}
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-pink-500 flex items-center justify-center text-white font-semibold uppercase text-lg overflow-hidden">
+                        <img *ngIf="authService.currentUser()?.avatarUrl" [src]="authService.currentUser()?.avatarUrl" alt="Avatar" class="w-full h-full object-cover" />
+                        <span *ngIf="!authService.currentUser()?.avatarUrl">{{authService.currentUser()?.username?.[0] || 'U'}}</span>
                     </div>
                     <div class="flex-1">
                         <div class="text-white font-medium flex items-center gap-2">

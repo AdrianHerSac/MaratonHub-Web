@@ -9,6 +9,7 @@ export interface UserInfo {
   role: string;
   email?: string;
   id?: string;
+  avatarUrl?: string;
 }
 
 export interface AuthResponse {
@@ -25,6 +26,7 @@ export class AuthService {
   private tokenKey = 'maratonhub_token';
   private userKey = 'maratonhub_user';
   private roleKey = 'maratonhub_role';
+  private avatarKey = 'maratonhub_avatar';
 
   public currentUser: WritableSignal<UserInfo | null> = signal(null);
 
@@ -50,11 +52,13 @@ export class AuthService {
         }
 
         const id = payload.sub;
+        const avatar = localStorage.getItem(this.avatarKey);
         this.currentUser.set({ 
           username, 
           role: role || 'User',
           id: id,
-          email: `${username.toLowerCase()}@maratonhub.com`
+          email: `${username.toLowerCase()}@maratonhub.com`,
+          avatarUrl: avatar || undefined
         });
       } catch (e) {
         this.logout();
@@ -102,17 +106,23 @@ export class AuthService {
     }
   }
 
-  public updateProfile(newUsername: string, newEmail: string) {
+  public updateProfile(newUsername: string, newEmail: string, newAvatarUrl?: string) {
     const user = this.currentUser();
     if (user) {
       const updatedUser = {
         ...user,
         username: newUsername,
-        email: newEmail
+        email: newEmail,
+        avatarUrl: newAvatarUrl
       };
       this.currentUser.set(updatedUser);
       localStorage.setItem(this.userKey, newUsername);
       localStorage.setItem('maratonhub_email', newEmail);
+      if (newAvatarUrl) {
+        localStorage.setItem(this.avatarKey, newAvatarUrl);
+      } else {
+        localStorage.removeItem(this.avatarKey);
+      }
     }
   }
 
@@ -130,11 +140,13 @@ export class AuthService {
       id = payload.sub;
     } catch (e) {}
 
+    const avatar = localStorage.getItem(this.avatarKey);
     this.currentUser.set({ 
       username: response.username, 
       role: response.role, 
       id: id,
-      email: `${response.username.toLowerCase()}@maratonhub.com`
+      email: `${response.username.toLowerCase()}@maratonhub.com`,
+      avatarUrl: avatar || undefined
     });
   }
 }
